@@ -202,7 +202,7 @@ public class LoginActivity extends BaseActivity implements GoogleApiClient.OnCon
 
     private void openMainActivity() {
         Log.d(TAG, "Open main activity");
-        Intent it = new Intent(LoginActivity.this, PhotoShowActivity.class);
+        Intent it = new Intent(LoginActivity.this, PhotoShareMainActivity.class);
         startActivity(it);
     }
 
