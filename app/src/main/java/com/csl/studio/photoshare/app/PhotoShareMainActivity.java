@@ -20,11 +20,11 @@ public class PhotoShareMainActivity extends AppCompatActivity {
                 case R.id.navigation_home:
                     _TextMessage.setText(R.string.title_home);
                     return true;
-                case R.id.navigation_dashboard:
-                    _TextMessage.setText(R.string.title_dashboard);
+                case R.id.navigation_user_shared_photo:
+                    _TextMessage.setText(R.string.title_share_photo);
                     return true;
-                case R.id.navigation_notifications:
-                    _TextMessage.setText(R.string.title_notifications);
+                case R.id.navigation_user_info:
+                    _TextMessage.setText(R.string.title_user_info);
                     return true;
             }
             return false;
