@@ -37,8 +37,7 @@ public class PhotoShareMainActivity extends AppCompatActivity implements GoogleA
                     FragmentManager mgr = getSupportFragmentManager();
                     FragmentTransaction tr = mgr.beginTransaction();
 
-                    UserInfoFragment frag = UserInfoFragment.newInstance();
-                    tr.add(R.id.content, frag);
+                    tr.replace(R.id.content, _user_info_frag);
                     tr.commit();
 
                     return true;
@@ -50,9 +49,12 @@ public class PhotoShareMainActivity extends AppCompatActivity implements GoogleA
 
     private static final String TAG = "PhotoShareMainActivity";
 
+    private UserInfoFragment _user_info_frag;
+
     private BottomNavigationView _nav_item;
     private FirebaseAuth _auth;
     private FirebaseAuth.AuthStateListener _auth_listener;
+    private GoogleApiClient _google_api_client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +80,8 @@ public class PhotoShareMainActivity extends AppCompatActivity implements GoogleA
                 }
             }
         };
+
+        _user_info_frag = UserInfoFragment.newInstance();
 
     }
 
