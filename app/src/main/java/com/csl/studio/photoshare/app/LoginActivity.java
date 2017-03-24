@@ -31,15 +31,13 @@ import com.google.firebase.auth.GoogleAuthProvider;
 
 public class LoginActivity extends BaseActivity implements GoogleApiClient.OnConnectionFailedListener {
 
-    private static final int REQUEST_READ_CONTACTS = 0;
     private static final int GOOGLE_SIGN_IN = 9001;
     private static final String TAG = "LoginActivity";
 
-    private FirebaseAuth mAuth;
-    private FirebaseAuth.AuthStateListener mAuthListener;
-    private GoogleApiClient mGoogleApiClient;
+    private FirebaseAuth _auth;
+    private FirebaseAuth.AuthStateListener _auth_listener;
+    private GoogleApiClient _google_api_client;
 
-    // UI references.
     private AutoCompleteTextView mEmailView;
     private EditText mPasswordView;
 
@@ -92,20 +90,20 @@ public class LoginActivity extends BaseActivity implements GoogleApiClient.OnCon
                 .requestEmail()
                 .build();
 
-        mGoogleApiClient = new GoogleApiClient.Builder(this)
+        _google_api_client = new GoogleApiClient.Builder(this)
                 .enableAutoManage(this, this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
         // Initial Firebase Authentication
-        mAuth = FirebaseAuth.getInstance();
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
+        _auth = FirebaseAuth.getInstance();
+        _auth_listener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                    openMainActivity();
+                    onBackPressed();
                 } else {
                     Log.d(TAG, "onAuthStateChanged:signed_out");
 
@@ -118,14 +116,14 @@ public class LoginActivity extends BaseActivity implements GoogleApiClient.OnCon
     @Override
     public void onStart() {
         super.onStart();
-        mAuth.addAuthStateListener(mAuthListener);
+        _auth.addAuthStateListener(_auth_listener);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if (mAuthListener != null) {
-            mAuth.removeAuthStateListener(mAuthListener);
+        if (_auth_listener != null) {
+            _auth.removeAuthStateListener(_auth_listener);
         }
     }
 
@@ -141,7 +139,7 @@ public class LoginActivity extends BaseActivity implements GoogleApiClient.OnCon
 
         showProgressDialog();
 
-        mAuth.createUserWithEmailAndPassword(email, password)
+        _auth.createUserWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -151,10 +149,7 @@ public class LoginActivity extends BaseActivity implements GoogleApiClient.OnCon
 
                         if (!task.isSuccessful()) {
                             Toast.makeText(LoginActivity.this, "Register Error", Toast.LENGTH_SHORT).show();
-                            return;
                         }
-
-                        openMainActivity();
                     }
                 });
 
@@ -173,21 +168,19 @@ public class LoginActivity extends BaseActivity implements GoogleApiClient.OnCon
 
         showProgressDialog();
 
-        mAuth.signInWithEmailAndPassword(email, password)
+        _auth.signInWithEmailAndPassword(email, password)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithEmail:onComplete:" + task.isSuccessful());
 
-                        hideProgressDialog();
-
                         if (!task.isSuccessful()) {
                             Log.w(TAG, "Sign In User: failed", task.getException());
                             Toast.makeText(LoginActivity.this, "Sign In Error", Toast.LENGTH_SHORT).show();
-                            return;
                         }
 
-                        openMainActivity();
+                        hideProgressDialog();
+
                     }
                 });
 
@@ -196,14 +189,8 @@ public class LoginActivity extends BaseActivity implements GoogleApiClient.OnCon
     private void googleSignIn() {
         Log.d(TAG, "Start Google Sign IN");
 
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(_google_api_client);
         startActivityForResult(signInIntent, GOOGLE_SIGN_IN);
-    }
-
-    private void openMainActivity() {
-        Log.d(TAG, "Open main activity");
-        Intent it = new Intent(LoginActivity.this, PhotoShareMainActivity.class);
-        startActivity(it);
     }
 
     @Override
@@ -220,26 +207,24 @@ public class LoginActivity extends BaseActivity implements GoogleApiClient.OnCon
         }
     }
 
-    private void firebaseAuthWithGoogle(GoogleSignInAccount acct) {
-        Log.d(TAG, "firebaseAuthWithGoogle:" + acct.getId());
+    private void firebaseAuthWithGoogle(GoogleSignInAccount account) {
+        Log.d(TAG, "firebaseAuthWithGoogle:" + account.getId());
 
         showProgressDialog();
 
-        AuthCredential credential = GoogleAuthProvider.getCredential(acct.getIdToken(), null);
-        mAuth.signInWithCredential(credential)
+        AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+        _auth.signInWithCredential(credential)
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         Log.d(TAG, "signInWithCredential:onComplete:" + task.isSuccessful());
 
-                        hideProgressDialog();
-
                         if (!task.isSuccessful()) {
                             Log.w(TAG, "signInWithCredential", task.getException());
                             Toast.makeText(LoginActivity.this, "Authentication failed.", Toast.LENGTH_SHORT).show();
-                            return;
                         }
-                        openMainActivity();
+
+                        hideProgressDialog();
                     }
                 });
     }

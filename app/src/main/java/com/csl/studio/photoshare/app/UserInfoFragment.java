@@ -4,6 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,6 +14,12 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.ResolvingResultCallbacks;
+import com.google.android.gms.common.api.ResultCallback;
+import com.google.android.gms.common.api.Status;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -23,7 +30,7 @@ public class UserInfoFragment extends Fragment {
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
         private ImageView _image;
 
-        public DownloadImageTask(ImageView _image) {
+        DownloadImageTask(ImageView _image) {
             this._image = _image;
         }
 
@@ -51,7 +58,14 @@ public class UserInfoFragment extends Fragment {
 
     private static String TAG = "UserInfoFragment";
 
-    private DownloadImageTask _load_image_task;
+    private TextView _user_email_view;
+    private TextView _user_name_view;
+    private TextView _user_uid_view;
+    private ImageView _user_photo_view;
+
+    private FirebaseAuth _auth;
+    private FirebaseAuth.AuthStateListener _auth_listener;
+    private GoogleApiClient _google_api_client;
 
     public UserInfoFragment() {
 
@@ -72,47 +86,89 @@ public class UserInfoFragment extends Fragment {
 
         View root_view = inflater.inflate(R.layout.fragment_user_info, container, false);
 
-        ImageView image_view = (ImageView) root_view.findViewById(R.id.user_icon_view);
-        _load_image_task = new DownloadImageTask(image_view);
+        _user_photo_view = (ImageView) root_view.findViewById(R.id.user_icon_view);
 
-        Button sign_out = (Button) root_view.findViewById(R.id.sign_out_button);
+        _user_email_view = (TextView) root_view.findViewById(R.id.user_email_view);
+        _user_name_view = (TextView) root_view.findViewById(R.id.user_name_view);
+        _user_uid_view = (TextView) root_view.findViewById(R.id.user_uid_view);
+
+        final Button sign_out = (Button) root_view.findViewById(R.id.sign_out_button);
         sign_out.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                FirebaseAuth.getInstance().signOut();
+                signOut();
             }
         });
 
-        updateUserInfoView(root_view, FirebaseAuth.getInstance().getCurrentUser());
+        _auth = FirebaseAuth.getInstance();
+        _auth_listener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                updateUserInfoView(user);
+            }
+        };
 
         return root_view;
     }
 
-    private void updateUserInfoView(View root_view, FirebaseUser user) {
+    @Override
+    public void onStart() {
+        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
 
-        if (null == root_view) {
-            Log.d(TAG, "UIView is null");
-            return;
+        _google_api_client = new GoogleApiClient.Builder(getActivity())
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+
+        _google_api_client.connect();
+        super.onStart();
+
+        _auth.addAuthStateListener(_auth_listener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (null != _auth_listener) {
+            _auth.removeAuthStateListener(_auth_listener);
         }
+    }
+
+    private void updateUserInfoView(FirebaseUser user) {
 
         if (null == user) {
             Log.d(TAG, "FirebaseUser object is null");
             return;
         }
 
-        TextView email_view = (TextView) root_view.findViewById(R.id.user_email_view);
-        email_view.setText(user.getEmail());
-
-        TextView user_name_view = (TextView) root_view.findViewById(R.id.user_name_view);
-        user_name_view.setText(user.getDisplayName());
-
-        TextView uid_view = (TextView) root_view.findViewById(R.id.user_uid_view);
-        uid_view.setText(user.getUid());
+        _user_email_view.setText(user.getEmail());
+        _user_name_view.setText(user.getDisplayName());
+        _user_uid_view.setText(user.getUid());
 
         if (null != user.getPhotoUrl()) {
-            _load_image_task.execute(user.getPhotoUrl().toString());
+            DownloadImageTask task = new DownloadImageTask(_user_photo_view);
+            task.execute(user.getPhotoUrl().toString());
+        } else {
+            _user_photo_view.setImageResource(R.drawable.anonymous_person);
         }
 
+    }
+
+    private void signOut() {
+        // Firebase sign out
+        FirebaseAuth.getInstance().signOut();
+
+        // Google sign out
+        Auth.GoogleSignInApi.signOut(_google_api_client).setResultCallback(
+                new ResultCallback<Status>() {
+                    @Override
+                    public void onResult(@NonNull Status status) {
+                        Log.d(TAG, "Logout!");
+                    }
+                }
+        );
     }
 
 }
