@@ -103,7 +103,7 @@ public class LoginActivity extends BaseActivity implements GoogleApiClient.OnCon
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     Log.d(TAG, "onAuthStateChanged:signed_in:" + user.getUid());
-                    onBackPressed();
+                    finish();
                 } else {
                     Log.d(TAG, "onAuthStateChanged:signed_out");
 
@@ -125,6 +125,14 @@ public class LoginActivity extends BaseActivity implements GoogleApiClient.OnCon
         if (_auth_listener != null) {
             _auth.removeAuthStateListener(_auth_listener);
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (_auth.getCurrentUser() == null) {
+            return;
+        }
+        super.onBackPressed();
     }
 
     private void registerUser() {
