@@ -55,6 +55,7 @@ public class UserInfoFragment extends Fragment {
     private TextView _user_email_view;
     private TextView _user_name_view;
     private TextView _user_uid_view;
+    private ImageView _user_photo_view;
 
     public UserInfoFragment() {
 
@@ -75,8 +76,8 @@ public class UserInfoFragment extends Fragment {
 
         View root_view = inflater.inflate(R.layout.fragment_user_info, container, false);
 
-        ImageView image_view = (ImageView) root_view.findViewById(R.id.user_icon_view);
-        _load_image_task = new DownloadImageTask(image_view);
+        _user_photo_view = (ImageView) root_view.findViewById(R.id.user_icon_view);
+        _load_image_task = new DownloadImageTask(_user_photo_view);
 
         _user_email_view = (TextView) root_view.findViewById(R.id.user_email_view);
         _user_name_view = (TextView) root_view.findViewById(R.id.user_name_view);
@@ -108,6 +109,8 @@ public class UserInfoFragment extends Fragment {
 
         if (null != user.getPhotoUrl()) {
             _load_image_task.execute(user.getPhotoUrl().toString());
+        } else {
+            _user_photo_view.setImageResource(R.drawable.anonymous_person);
         }
 
     }
