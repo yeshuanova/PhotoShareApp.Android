@@ -3,6 +3,8 @@ package com.csl.studio.photoshare.app;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.widget.TextView;
@@ -10,7 +12,6 @@ import android.widget.TextView;
 public class PhotoShareMainActivity extends AppCompatActivity {
 
     private TextView _TextMessage;
-
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
 
@@ -24,7 +25,14 @@ public class PhotoShareMainActivity extends AppCompatActivity {
                     _TextMessage.setText(R.string.title_share_photo);
                     return true;
                 case R.id.navigation_user_info:
-                    _TextMessage.setText(R.string.title_user_info);
+
+                    FragmentManager mgr = getSupportFragmentManager();
+                    FragmentTransaction tr = mgr.beginTransaction();
+
+                    UserInfoFragment frag = UserInfoFragment.newInstance();
+                    tr.add(R.id.content, frag);
+                    tr.commit();
+
                     return true;
             }
             return false;
