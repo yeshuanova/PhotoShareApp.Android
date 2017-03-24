@@ -23,7 +23,7 @@ public class UserInfoFragment extends Fragment {
     private class DownloadImageTask extends AsyncTask<String, Void, Bitmap> {
         private ImageView _image;
 
-        public DownloadImageTask(ImageView _image) {
+        DownloadImageTask(ImageView _image) {
             this._image = _image;
         }
 
@@ -52,6 +52,9 @@ public class UserInfoFragment extends Fragment {
     private static String TAG = "UserInfoFragment";
 
     private DownloadImageTask _load_image_task;
+    private TextView _user_email_view;
+    private TextView _user_name_view;
+    private TextView _user_uid_view;
 
     public UserInfoFragment() {
 
@@ -75,6 +78,10 @@ public class UserInfoFragment extends Fragment {
         ImageView image_view = (ImageView) root_view.findViewById(R.id.user_icon_view);
         _load_image_task = new DownloadImageTask(image_view);
 
+        _user_email_view = (TextView) root_view.findViewById(R.id.user_email_view);
+        _user_name_view = (TextView) root_view.findViewById(R.id.user_name_view);
+        _user_uid_view = (TextView) root_view.findViewById(R.id.user_uid_view);
+
         Button sign_out = (Button) root_view.findViewById(R.id.sign_out_button);
         sign_out.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -83,31 +90,21 @@ public class UserInfoFragment extends Fragment {
             }
         });
 
-        updateUserInfoView(root_view, FirebaseAuth.getInstance().getCurrentUser());
+        updateUserInfoView(FirebaseAuth.getInstance().getCurrentUser());
 
         return root_view;
     }
 
-    private void updateUserInfoView(View root_view, FirebaseUser user) {
-
-        if (null == root_view) {
-            Log.d(TAG, "UIView is null");
-            return;
-        }
+    private void updateUserInfoView(FirebaseUser user) {
 
         if (null == user) {
             Log.d(TAG, "FirebaseUser object is null");
             return;
         }
 
-        TextView email_view = (TextView) root_view.findViewById(R.id.user_email_view);
-        email_view.setText(user.getEmail());
-
-        TextView user_name_view = (TextView) root_view.findViewById(R.id.user_name_view);
-        user_name_view.setText(user.getDisplayName());
-
-        TextView uid_view = (TextView) root_view.findViewById(R.id.user_uid_view);
-        uid_view.setText(user.getUid());
+        _user_email_view.setText(user.getEmail());
+        _user_name_view.setText(user.getDisplayName());
+        _user_uid_view.setText(user.getUid());
 
         if (null != user.getPhotoUrl()) {
             _load_image_task.execute(user.getPhotoUrl().toString());
