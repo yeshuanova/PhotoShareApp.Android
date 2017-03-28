@@ -8,6 +8,8 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
@@ -48,13 +50,12 @@ public class PhotoShareMainActivity extends AppCompatActivity implements GoogleA
     };
 
     private static final String TAG = "PhotoShareMainActivity";
+    private static final int CREATE_MESSAGE_CODE = 1000;
 
     private UserInfoFragment _user_info_frag;
-
     private BottomNavigationView _nav_item;
     private FirebaseAuth _auth;
     private FirebaseAuth.AuthStateListener _auth_listener;
-    private GoogleApiClient _google_api_client;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,9 +100,31 @@ public class PhotoShareMainActivity extends AppCompatActivity implements GoogleA
         }
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.navigation_main_top, menu);
+        return super.onCreateOptionsMenu(menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        super.onOptionsItemSelected(item);
+        final int id = item.getItemId();
+        if (R.id.action_open_post_activity == id) {
+            openCreateMessageActivity();
+        }
+        return false;
+    }
+
     private void updateUI() {
         _nav_item.setOnNavigationItemSelectedListener(_select_nav_item_listener);
         _nav_item.setSelectedItemId(R.id.navigation_home);
+    }
+
+    private void openCreateMessageActivity() {
+        Intent it = new Intent(this, CreateMessageActivity.class);
+        startActivityForResult(it, CREATE_MESSAGE_CODE);
     }
 
     @Override
