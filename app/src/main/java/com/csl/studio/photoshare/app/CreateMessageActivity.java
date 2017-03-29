@@ -2,6 +2,7 @@ package com.csl.studio.photoshare.app;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
@@ -71,7 +72,8 @@ public class CreateMessageActivity extends AppCompatActivity {
 
         @Override
         public void onClick(View view) {
-
+            Intent i = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(i, CHOOSE_GALLERY_CODE);
         }
     }
 
@@ -83,6 +85,7 @@ public class CreateMessageActivity extends AppCompatActivity {
     String _photo_path = "";
     String _resize_photo_path = "";
 
+    private static final String TAG = "TakePhotoActivity";
     private static final String PHOTO_EXT = "jpg";
     private static final String PHOTO_NAME = "photo_name" + "." + PHOTO_EXT;
     private static final String PHOTO_RESIZE_NAME = "photo_resize_name" + "." + PHOTO_EXT;
@@ -100,6 +103,7 @@ public class CreateMessageActivity extends AppCompatActivity {
         _photo_view = (ImageView) findViewById(R.id.photo_view);
 
         _gallery_btn = (ImageButton) findViewById(R.id.choose_gallery_photo_btn);
+        _gallery_btn.setOnClickListener(new ChooseGalleryPhotoListener());
 
         _take_photo_btn = (ImageButton) findViewById(R.id.take_photo_camera_btn);
         _take_photo_btn.setOnClickListener(new TakePhotoListener(TAKE_PHOTO_CODE, PHOTO_NAME));
@@ -138,55 +142,66 @@ public class CreateMessageActivity extends AppCompatActivity {
             File img_file = new File(_photo_path);
             if (img_file.exists()) {
                 Bitmap origin_bmp = ImageUtility.decodeBitmapFromFile(_photo_path);
-
                 _photo_view.setImageBitmap(origin_bmp);
-
-
-                // Resize image to thumbnail
-                final int max_size = 3000;
-                final float ratio = origin_bmp.getWidth() / (float) origin_bmp.getHeight();
-
-                int new_width;
-                int new_height;
-
-                if (origin_bmp.getWidth() >= origin_bmp.getHeight()) {
-                    new_width = max_size;
-                    new_height = Math.round(new_width / ratio);
-                } else if (origin_bmp.getHeight() > origin_bmp.getWidth()) {
-                    new_height = max_size;
-                    new_width = Math.round(new_height * ratio);
-                } else {
-                    new_width = origin_bmp.getWidth();
-                    new_height = origin_bmp.getHeight();
-                }
-
-                Bitmap resize_bmp = Bitmap.createScaledBitmap(origin_bmp, new_width, new_height, true);
-                Log.d(getClass().getName(), "Resize Width: " + resize_bmp.getWidth() + ", Height: " + resize_bmp.getHeight());
-
-                FileOutputStream out = null;
-                try {
-
-                    String dir_name = BuildConfig.APPLICATION_ID;
-                    _resize_photo_path = FileUtility.getPublicPictureDir(dir_name).getAbsolutePath() + "/" + PHOTO_RESIZE_NAME;
-                    out = new FileOutputStream(_resize_photo_path);
-                    resize_bmp.compress(Bitmap.CompressFormat.JPEG, 100, out);
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                } finally {
-                    try {
-                        if (out != null) {
-                            out.close();
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
-                }
-                Log.d(getClass().getName(), "Resize Photo Path: " + _resize_photo_path);
-
             }
+        } else if (CHOOSE_GALLERY_CODE == requestCode && Activity.RESULT_OK == resultCode) {
+            Uri image_uri = data.getData();
+
+            Log.d(TAG, "Image URI: " + image_uri);
+
+            String[] file_path_column = {MediaStore.Images.Media.DATA};
+            Cursor cursor = getContentResolver().query(image_uri, file_path_column, null, null, null);
+
+            if (null != cursor) {
+                cursor.moveToFirst();
+                int column_index = cursor.getColumnIndex(file_path_column[0]);
+                _photo_path = cursor.getString(column_index);
+                _photo_view.setImageBitmap(BitmapFactory.decodeFile(_photo_path));
+            }
+            cursor.close();
         }
 
+    }
+
+    private void convertToThumbnail(Bitmap origin_bmp, int max_size) {
+
+        final float ratio = origin_bmp.getWidth() / (float) origin_bmp.getHeight();
+
+        int new_width;
+        int new_height;
+
+        if (origin_bmp.getWidth() >= origin_bmp.getHeight()) {
+            new_width = max_size;
+            new_height = Math.round(new_width / ratio);
+        } else if (origin_bmp.getHeight() > origin_bmp.getWidth()) {
+            new_height = max_size;
+            new_width = Math.round(new_height * ratio);
+        } else {
+            new_width = origin_bmp.getWidth();
+            new_height = origin_bmp.getHeight();
+        }
+
+        Bitmap resize_bmp = Bitmap.createScaledBitmap(origin_bmp, new_width, new_height, true);
+        Log.d(getClass().getName(), "Resize Width: " + resize_bmp.getWidth() + ", Height: " + resize_bmp.getHeight());
+
+        FileOutputStream out = null;
+        try {
+            String dir_name = BuildConfig.APPLICATION_ID;
+            _resize_photo_path = FileUtility.getPublicPictureDir(dir_name).getAbsolutePath() + "/" + PHOTO_RESIZE_NAME;
+            out = new FileOutputStream(_resize_photo_path);
+            resize_bmp.compress(Bitmap.CompressFormat.JPEG, 100, out);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                if (out != null) {
+                    out.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        Log.d(getClass().getName(), "Resize Photo Path: " + _resize_photo_path);
     }
 
     void postMessage() {
