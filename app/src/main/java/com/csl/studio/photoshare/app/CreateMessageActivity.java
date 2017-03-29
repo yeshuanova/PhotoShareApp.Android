@@ -85,7 +85,7 @@ public class CreateMessageActivity extends AppCompatActivity {
     String _photo_path = "";
     String _resize_photo_path = "";
 
-    private static final String TAG = "TakePhotoActivity";
+    private static final String TAG = "CreateMessageActivity";
     private static final String PHOTO_EXT = "jpg";
     private static final String PHOTO_NAME = "photo_name" + "." + PHOTO_EXT;
     private static final String PHOTO_RESIZE_NAME = "photo_resize_name" + "." + PHOTO_EXT;
@@ -156,6 +156,7 @@ public class CreateMessageActivity extends AppCompatActivity {
                 cursor.moveToFirst();
                 int column_index = cursor.getColumnIndex(file_path_column[0]);
                 _photo_path = cursor.getString(column_index);
+                Log.d(TAG, "Image Path" + _photo_path);
                 _photo_view.setImageBitmap(BitmapFactory.decodeFile(_photo_path));
             }
             cursor.close();
