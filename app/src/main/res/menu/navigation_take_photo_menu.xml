@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <item
+        android:id="@+id/nav_action_post"
+        android:icon="@drawable/ic_action_post_message"
+        android:title="@string/nav_action_post"
+        app:showAsAction="always" />
+
+</menu>

@@ -23,4 +23,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="sign_out">Sign Out</string>
     <string name="login_activity_label">User Login</string>
+    <string name="take_photo_content_hint_input_message">Input your message</string>
+    <string name="nav_action_post">Post</string>
+    <string name="nav_action_open_post_activity">Post</string>
 </resources>
