@@ -7,9 +7,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.provider.MediaStore;
-import android.support.v7.app.AppCompatActivity;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -19,17 +18,26 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.csl.studio.photoshare.app.utility.FileUtility;
 import com.csl.studio.photoshare.app.utility.ImageUtility;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.UUID;
 
-public class CreateMessageActivity extends AppCompatActivity {
+public class CreateMessageActivity extends BaseActivity {
 
     private class TakePhotoListener implements View.OnClickListener {
 
@@ -83,7 +91,9 @@ public class CreateMessageActivity extends AppCompatActivity {
     ImageButton _gallery_btn;
     ImageButton _take_photo_btn;
     String _photo_path = "";
-    String _resize_photo_path = "";
+    String _photo_thumbnail_path = "";
+
+    private StorageReference _storage_ref;
 
     private static final String TAG = "CreateMessageActivity";
     private static final String PHOTO_EXT = "jpg";
@@ -112,6 +122,8 @@ public class CreateMessageActivity extends AppCompatActivity {
         if (null != user) {
             _user_view.setText(user.getEmail());
         }
+
+        _storage_ref = FirebaseStorage.getInstance().getReference();
 
     }
 
@@ -143,6 +155,8 @@ public class CreateMessageActivity extends AppCompatActivity {
             if (img_file.exists()) {
                 Bitmap origin_bmp = ImageUtility.decodeBitmapFromFile(_photo_path);
                 _photo_view.setImageBitmap(origin_bmp);
+
+                convertToThumbnail(origin_bmp, 200);
             }
         } else if (CHOOSE_GALLERY_CODE == requestCode && Activity.RESULT_OK == resultCode) {
             Uri image_uri = data.getData();
@@ -188,8 +202,8 @@ public class CreateMessageActivity extends AppCompatActivity {
         FileOutputStream out = null;
         try {
             String dir_name = BuildConfig.APPLICATION_ID;
-            _resize_photo_path = FileUtility.getPublicPictureDir(dir_name).getAbsolutePath() + "/" + PHOTO_RESIZE_NAME;
-            out = new FileOutputStream(_resize_photo_path);
+            _photo_thumbnail_path = FileUtility.getPublicPictureDir(dir_name).getAbsolutePath() + "/" + PHOTO_RESIZE_NAME;
+            out = new FileOutputStream(_photo_thumbnail_path);
             resize_bmp.compress(Bitmap.CompressFormat.JPEG, 100, out);
         } catch (Exception e) {
             e.printStackTrace();
@@ -202,11 +216,99 @@ public class CreateMessageActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }
-        Log.d(getClass().getName(), "Resize Photo Path: " + _resize_photo_path);
+        Log.d(getClass().getName(), "Resize Photo Path: " + _photo_thumbnail_path);
     }
 
     void postMessage() {
 
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        if (null == user) {
+            Toast.makeText(this, "Please Sign", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (null == _photo_path || _photo_path.isEmpty()) {
+            Toast.makeText(this, "No shared photo", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        if (null == _photo_thumbnail_path || _photo_thumbnail_path.isEmpty()) {
+            Toast.makeText(this, "No thumbnail photo", Toast.LENGTH_SHORT).show();
+            return;
+        }
+
+        final String message_uuid = UUID.randomUUID().toString();
+        final String photo_uuid = UUID.randomUUID().toString();
+        final String user_uid = user.getUid();
+
+        Log.d(TAG, "message uuid:" + message_uuid);
+        Log.d(TAG, "photo uuid: " + photo_uuid);
+        Log.d(TAG, "user uid: " + user_uid);
+
+        uploadPhoto(_photo_path, photo_uuid + ".jpg");
+        uploadThumbnail(_photo_thumbnail_path, photo_uuid + ".jpg");
+
     }
+
+    private void uploadPhoto(String file_path, String upload_name) {
+
+        StorageReference photos_ref = _storage_ref.child("Photos/" + upload_name);
+
+        Uri file_photo = Uri.fromFile(new File(file_path));
+        photos_ref.putFile(file_photo)
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        // Get a URL to the uploaded content
+                        Log.d(TAG, "Upload Photo Successful");
+                        Log.d(TAG, "URL: " + taskSnapshot.getDownloadUrl());
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        Log.d(TAG, "Upload Photo Error: " + exception.toString());
+                    }
+                })
+                .addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                        Log.d(TAG, "Upload photo complete");
+                    }
+                });
+
+    }
+
+    private void uploadThumbnail(String file_path, String upload_name) {
+
+        Uri file_thumbnail = Uri.fromFile(new File(file_path));
+
+        StorageReference thumbnails_ref = _storage_ref.child("Thumbnails/" + upload_name + ".jpg");
+
+        thumbnails_ref.putFile(file_thumbnail)
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        Log.d(TAG, "Upload Thumbnail success");
+                        Log.d(TAG, "URL: " + taskSnapshot.getDownloadUrl());
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Log.d(TAG, "Upload Thumbnail failure");
+                    }
+                })
+                .addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                        Log.d(TAG, "Upload Thumbnail complete");
+                    }
+                });
+
+    }
+
+
 
 }
