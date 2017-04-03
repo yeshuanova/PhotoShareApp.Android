@@ -42,15 +42,20 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.UUID;
 
 public class CreateMessageActivity extends BaseActivity {
 
@@ -334,25 +339,30 @@ public class CreateMessageActivity extends BaseActivity {
             return;
         }
 
-        final String photo_name = getFileUUID(_photo_path);
-        final String thumbnail_name = photo_name;
+        try {
+            final String photo_name = sha1_file(new File(_photo_path));
+            final String thumbnail_name = sha1_file(new File(_photo_thumbnail_path));
 
-        uploadImage(_photo_path, photo_name);
-        uploadImageInfo(_photo_path, photo_name);
-        uploadThumbnail(_photo_thumbnail_path, thumbnail_name);
-        uploadMessage(photo_name, thumbnail_name);
+            uploadImage(_photo_path, photo_name);
+            uploadThumbnail(_photo_thumbnail_path, thumbnail_name);
+            uploadMessage(photo_name, thumbnail_name);
+            
+            uploadImageInfo(_photo_path, photo_name);
+            uploadImageInfo(_photo_thumbnail_path, thumbnail_name);
 
-        finish();
-    }
+            finish();
 
-    private String getFileUUID(String file_path) {
-        return UUID.randomUUID().toString();
+        } catch (NoSuchAlgorithmException | IOException e) {
+            e.printStackTrace();
+
+            Toast.makeText(this, "Upload Post Error", Toast.LENGTH_SHORT).show();
+        }
+
     }
 
     private void uploadMessage(String photo_name, String thumbnail_name) {
 
-        DatabaseReference post_ref = _database_ref.getReference().child("posts");
-
+        DatabaseReference post_ref = _database_ref.getReference();
         final String key = post_ref.push().getKey();
         Log.d(TAG, "Push's Key: " + key);
 
@@ -382,6 +392,26 @@ public class CreateMessageActivity extends BaseActivity {
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
         return sdf.format(new Date());
     }
+
+    private String sha1_file(final File file) throws NoSuchAlgorithmException, IOException {
+        final MessageDigest messageDigest = MessageDigest.getInstance("SHA1");
+
+        try (InputStream is = new BufferedInputStream(new FileInputStream(file))) {
+            final byte[] buffer = new byte[1024];
+            for (int read = 0; (read = is.read(buffer)) != -1; ) {
+                messageDigest.update(buffer, 0, read);
+            }
+        }
+
+        // Convert the byte to hex format
+        try (Formatter formatter = new Formatter()) {
+            for (final byte b : messageDigest.digest()) {
+                formatter.format("%02x", b);
+            }
+            return formatter.toString();
+        }
+    }
+
 
     private void uploadImage(String file_path, String upload_name) {
 
