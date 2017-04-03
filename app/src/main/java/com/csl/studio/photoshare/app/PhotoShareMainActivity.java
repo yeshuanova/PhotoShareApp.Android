@@ -18,7 +18,7 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-public class PhotoShareMainActivity extends AppCompatActivity implements GoogleApiClient.OnConnectionFailedListener {
+public class PhotoShareMainActivity extends BaseActivity implements GoogleApiClient.OnConnectionFailedListener {
 
     private BottomNavigationView.OnNavigationItemSelectedListener _select_nav_item_listener
             = new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -87,13 +87,13 @@ public class PhotoShareMainActivity extends AppCompatActivity implements GoogleA
     }
 
     @Override
-    protected void onStart() {
+    public void onStart() {
         super.onStart();
         _auth.addAuthStateListener(_auth_listener);
     }
 
     @Override
-    protected void onStop() {
+    public void onStop() {
         super.onStop();
         if (null != _auth_listener) {
             _auth.removeAuthStateListener(_auth_listener);
