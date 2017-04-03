@@ -1,4 +1,4 @@
-package com.csl.studio.photoshare.app.data;
+package com.csl.studio.photoshare.app.model;
 
 
 import com.google.firebase.auth.FirebaseAuth;

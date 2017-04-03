@@ -1,14 +1,19 @@
 package com.csl.studio.photoshare.app;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,6 +25,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.csl.studio.photoshare.app.model.PhotoAttribute;
+import com.csl.studio.photoshare.app.model.PostFormat;
 import com.csl.studio.photoshare.app.utility.FileUtility;
 import com.csl.studio.photoshare.app.utility.ImageUtility;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -28,6 +35,9 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -35,9 +45,18 @@ import com.google.firebase.storage.UploadTask;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.UUID;
 
 public class CreateMessageActivity extends BaseActivity {
+
+    private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 299;
+    private static final int MY_PERMISSIONS_REQUEST_READ_CAMERA = 299;
+
 
     private class TakePhotoListener implements View.OnClickListener {
 
@@ -51,6 +70,36 @@ public class CreateMessageActivity extends BaseActivity {
 
         @Override
         public void onClick(View view) {
+
+            if (Build.VERSION.SDK_INT >= 23) {
+                if (ContextCompat.checkSelfPermission(CreateMessageActivity.this,
+                        Manifest.permission.CAMERA)
+                        != PackageManager.PERMISSION_GRANTED) {
+
+                    // Should we show an explanation?
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(CreateMessageActivity.this,
+                            Manifest.permission.CAMERA)) {
+
+                    } else {
+                        // No explanation needed, we can request the permission.
+                        ActivityCompat.requestPermissions(CreateMessageActivity.this,
+                                new String[]{Manifest.permission.CAMERA},
+                                MY_PERMISSIONS_REQUEST_READ_CAMERA);
+                    }
+                } else {
+                    ActivityCompat.requestPermissions(CreateMessageActivity.this,
+                            new String[]{Manifest.permission.CAMERA},
+                            MY_PERMISSIONS_REQUEST_READ_CAMERA);
+
+                    takePhotoAction();
+                }
+
+            } else {
+                takePhotoAction();
+            }
+        }
+
+        void takePhotoAction() {
             Intent it = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             if (it.resolveActivity(getPackageManager()) != null) {
                 startActivityForResult(it, TAKE_PHOTO_CODE);
@@ -80,9 +129,40 @@ public class CreateMessageActivity extends BaseActivity {
 
         @Override
         public void onClick(View view) {
+
+            if (Build.VERSION.SDK_INT >= 23) {
+                if (ContextCompat.checkSelfPermission(CreateMessageActivity.this,
+                        android.Manifest.permission.READ_EXTERNAL_STORAGE)
+                        != PackageManager.PERMISSION_GRANTED) {
+
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(CreateMessageActivity.this,
+                            android.Manifest.permission.READ_EXTERNAL_STORAGE)) {
+
+                    } else {
+                        ActivityCompat.requestPermissions(CreateMessageActivity.this,
+                                new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE},
+                                MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+
+                    }
+                } else {
+                    ActivityCompat.requestPermissions(CreateMessageActivity.this,
+                            new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE},
+                            MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
+
+                    startChooseGallery();
+                }
+
+            } else {
+                startChooseGallery();
+            }
+
+        }
+
+        void startChooseGallery() {
             Intent i = new Intent(Intent.ACTION_PICK, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
             startActivityForResult(i, CHOOSE_GALLERY_CODE);
         }
+
     }
 
     TextView _user_view;
@@ -94,6 +174,7 @@ public class CreateMessageActivity extends BaseActivity {
     String _photo_thumbnail_path = "";
 
     private StorageReference _storage_ref;
+    private FirebaseDatabase _database_ref;
 
     private static final String TAG = "CreateMessageActivity";
     private static final String PHOTO_EXT = "jpg";
@@ -124,6 +205,7 @@ public class CreateMessageActivity extends BaseActivity {
         }
 
         _storage_ref = FirebaseStorage.getInstance().getReference();
+        _database_ref = FirebaseDatabase.getInstance();
 
     }
 
@@ -140,7 +222,7 @@ public class CreateMessageActivity extends BaseActivity {
 
         final int id = item.getItemId();
         if (R.id.nav_action_post == id) {
-            postMessage();
+            submitPost();
         }
         return false;
     }
@@ -171,11 +253,25 @@ public class CreateMessageActivity extends BaseActivity {
                 int column_index = cursor.getColumnIndex(file_path_column[0]);
                 _photo_path = cursor.getString(column_index);
                 Log.d(TAG, "Image Path" + _photo_path);
-                _photo_view.setImageBitmap(BitmapFactory.decodeFile(_photo_path));
+
+                Bitmap bitmap = BitmapFactory.decodeFile(_photo_path);
+                _photo_view.setImageBitmap(bitmap);
+                convertToThumbnail(bitmap, 200);
+                cursor.close();
             }
-            cursor.close();
         }
 
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == MY_PERMISSIONS_REQUEST_READ_CAMERA) {
+            Log.d(TAG, "Receive MY_PERMISSIONS_REQUEST_READ_CAMERA");
+        } else if (requestCode == MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE) {
+            Log.d(TAG, "Receive MY_PERMISSIONS_REQUEST_READ_CAMERA");
+        }
     }
 
     private void convertToThumbnail(Bitmap origin_bmp, int max_size) {
@@ -219,7 +315,7 @@ public class CreateMessageActivity extends BaseActivity {
         Log.d(getClass().getName(), "Resize Photo Path: " + _photo_thumbnail_path);
     }
 
-    void postMessage() {
+    private void submitPost() {
 
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -238,20 +334,56 @@ public class CreateMessageActivity extends BaseActivity {
             return;
         }
 
-        final String message_uuid = UUID.randomUUID().toString();
-        final String photo_uuid = UUID.randomUUID().toString();
-        final String user_uid = user.getUid();
+        final String photo_name = getFileUUID(_photo_path);
+        final String thumbnail_name = photo_name;
 
-        Log.d(TAG, "message uuid:" + message_uuid);
-        Log.d(TAG, "photo uuid: " + photo_uuid);
-        Log.d(TAG, "user uid: " + user_uid);
+        uploadImage(_photo_path, photo_name);
+        uploadImageInfo(_photo_path, photo_name);
+        uploadThumbnail(_photo_thumbnail_path, thumbnail_name);
+        uploadMessage(photo_name, thumbnail_name);
 
-        uploadPhoto(_photo_path, photo_uuid + ".jpg");
-        uploadThumbnail(_photo_thumbnail_path, photo_uuid + ".jpg");
-
+        finish();
     }
 
-    private void uploadPhoto(String file_path, String upload_name) {
+    private String getFileUUID(String file_path) {
+        return UUID.randomUUID().toString();
+    }
+
+    private void uploadMessage(String photo_name, String thumbnail_name) {
+
+        DatabaseReference post_ref = _database_ref.getReference().child("posts");
+
+        final String key = post_ref.push().getKey();
+        Log.d(TAG, "Push's Key: " + key);
+
+        // PostFormat
+        PostFormat post = new PostFormat();
+        post.auth_uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        post.message = _message_edit.getText().toString();
+        post.photo = photo_name;
+        post.thumbnail = thumbnail_name;
+        post.post_time = getCurrentTimeString();
+
+        Map<String, Object> post_data_map = post.toMap();
+
+        Map<String, Object> update_list = new HashMap<>();
+        update_list.put("/posts/" + key, post_data_map);
+        update_list.put("/user-posts/" + post.auth_uid + "/" + key, post_data_map);
+
+        post_ref.updateChildren(update_list, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                Log.d(TAG, "Update message complete");
+            }
+        });
+    }
+
+    private String getCurrentTimeString() {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        return sdf.format(new Date());
+    }
+
+    private void uploadImage(String file_path, String upload_name) {
 
         StorageReference photos_ref = _storage_ref.child("Photos/" + upload_name);
 
@@ -278,6 +410,26 @@ public class CreateMessageActivity extends BaseActivity {
                     }
                 });
 
+
+    }
+
+    private void uploadImageInfo(String file_path, String photo_name) {
+
+        String file_ext = file_path.substring(file_path.lastIndexOf(".") + 1);
+
+        PhotoAttribute attr = new PhotoAttribute();
+        attr.upload_time = Calendar.getInstance().toString();
+        attr.file_ext = file_ext;
+        attr.upload_time = getCurrentTimeString();
+
+        Map attrs_maps = attr.toMap();
+        DatabaseReference image_ref = _database_ref.getReference().child("image-info").child(photo_name);
+        image_ref.setValue(attrs_maps, new DatabaseReference.CompletionListener() {
+            @Override
+            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                Log.d(TAG, "Update Image Attribute Ok");
+            }
+        });
     }
 
     private void uploadThumbnail(String file_path, String upload_name) {
@@ -308,7 +460,5 @@ public class CreateMessageActivity extends BaseActivity {
                 });
 
     }
-
-
 
 }
