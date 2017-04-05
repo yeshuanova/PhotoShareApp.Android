@@ -1,4 +1,4 @@
-package com.csl.studio.photoshare.app.view;
+package com.csl.studio.photoshare.app.controller;
 
 import android.app.ProgressDialog;
 import android.support.annotation.VisibleForTesting;

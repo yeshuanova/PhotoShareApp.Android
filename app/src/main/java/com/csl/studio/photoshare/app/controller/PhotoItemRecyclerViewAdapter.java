@@ -1,4 +1,4 @@
-package com.csl.studio.photoshare.app.view;
+package com.csl.studio.photoshare.app.controller;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;

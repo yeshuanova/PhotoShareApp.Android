@@ -8,7 +8,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.csl.studio.photoshare.app.view.LoginActivity">
+    tools:context="com.csl.studio.photoshare.app.controller.LoginActivity">
 
     <!-- Login progress -->
     <ProgressBar
