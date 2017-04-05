@@ -11,8 +11,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.csl.studio.photoshare.app.R;
-import com.csl.studio.photoshare.app.dummy.DummyContent;
-import com.csl.studio.photoshare.app.dummy.DummyContent.DummyItem;
+import com.csl.studio.photoshare.app.model.PostItemContent;
+import com.csl.studio.photoshare.app.model.PostItem;
 
 /**
  * A fragment representing a list of Items.
@@ -68,7 +68,7 @@ public class PhotoListFragment extends Fragment {
             } else {
                 recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
             }
-            recyclerView.setAdapter(new PhotoItemRecyclerViewAdapter(DummyContent.ITEMS, mListener));
+            recyclerView.setAdapter(new PhotoItemRecyclerViewAdapter(PostItemContent.ITEMS, mListener));
         }
         return view;
     }
@@ -103,6 +103,6 @@ public class PhotoListFragment extends Fragment {
      */
     public interface OnListFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onListFragmentInteraction(DummyItem item);
+        void onListFragmentInteraction(PostItem item);
     }
 }

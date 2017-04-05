@@ -1,20 +1,49 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="wrap_content"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:minHeight="120dp"
     android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/id"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem" />
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/poster_icon"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-    <TextView
-        android:id="@+id/content"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_margin="@dimen/text_margin"
-        android:textAppearance="?attr/textAppearanceListItem" />
-</LinearLayout>
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/user_name_view"
+        android:layout_width="0dp"
+        android:layout_height="24dp"
+        android:ellipsize="end"
+        android:gravity="center_vertical"
+        android:hint="User name(or Email)"
+        android:lines="1"
+        android:paddingEnd="8dp"
+        android:paddingStart="8dp"
+        app:layout_constraintLeft_toRightOf="@+id/poster_icon"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/post_message_view"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:paddingBottom="8dp"
+        android:paddingTop="8dp"
+        app:layout_constraintLeft_toLeftOf="@+id/user_name_view"
+        app:layout_constraintRight_toRightOf="@+id/user_name_view"
+        app:layout_constraintTop_toBottomOf="@+id/user_name_view" />
+
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/image_thumbnail"
+        android:layout_width="0dp"
+        android:layout_height="100dp"
+        app:layout_constraintLeft_toLeftOf="@+id/post_message_view"
+        app:layout_constraintRight_toRightOf="@+id/post_message_view"
+        app:layout_constraintTop_toBottomOf="@+id/post_message_view" />
+
+</android.support.constraint.ConstraintLayout>

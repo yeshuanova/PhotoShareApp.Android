@@ -4,26 +4,27 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.csl.studio.photoshare.app.R;
-import com.csl.studio.photoshare.app.dummy.DummyContent.DummyItem;
+import com.csl.studio.photoshare.app.model.PostItem;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * {@link RecyclerView.Adapter} that can display a {@link DummyItem} and makes a call to the
+ * {@link RecyclerView.Adapter} that can display a {@link PostItem} and makes a call to the
  * specified {@link PhotoListFragment.OnListFragmentInteractionListener}.
- * TODO: Replace the implementation with code for your data type.
  */
 public class PhotoItemRecyclerViewAdapter extends RecyclerView.Adapter<PhotoItemRecyclerViewAdapter.ViewHolder> {
 
-    private final List<DummyItem> mValues;
-    private final PhotoListFragment.OnListFragmentInteractionListener mListener;
+    private List<PostItem> _post_data = new ArrayList<>();
+    private PhotoListFragment.OnListFragmentInteractionListener _Listener;
 
-    public PhotoItemRecyclerViewAdapter(List<DummyItem> items, PhotoListFragment.OnListFragmentInteractionListener listener) {
-        mValues = items;
-        mListener = listener;
+    public PhotoItemRecyclerViewAdapter(List<PostItem> items, PhotoListFragment.OnListFragmentInteractionListener listener) {
+        _post_data = items;
+        _Listener = listener;
     }
 
     @Override
@@ -35,43 +36,33 @@ public class PhotoItemRecyclerViewAdapter extends RecyclerView.Adapter<PhotoItem
 
     @Override
     public void onBindViewHolder(final ViewHolder holder, int position) {
-        holder.mItem = mValues.get(position);
-        holder.mIdView.setText(mValues.get(position).id);
-        holder.mContentView.setText(mValues.get(position).content);
 
-        holder.mView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (null != mListener) {
-                    // Notify the active callbacks interface (the activity, if the
-                    // fragment is attached to one) that an item has been selected.
-                    mListener.onListFragmentInteraction(holder.mItem);
-                }
-            }
-        });
+        PostItem item = _post_data.get(position);
+
+        holder._user_name.setText(item.user_uid);
+        holder._post_message.setText(item.post_content);
+
     }
 
     @Override
     public int getItemCount() {
-        return mValues.size();
+        return _post_data.size();
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        public final View mView;
-        public final TextView mIdView;
-        public final TextView mContentView;
-        public DummyItem mItem;
+        public ImageView _user_icon;
+        public TextView _user_name;
+        public TextView _post_message;
+        public ImageView _post_image;
 
         public ViewHolder(View view) {
             super(view);
-            mView = view;
-            mIdView = (TextView) view.findViewById(R.id.id);
-            mContentView = (TextView) view.findViewById(R.id.content);
+            _user_icon = (ImageView) view.findViewById(R.id.user_icon_view);
+            _user_name = (TextView) view.findViewById(R.id.user_name_view);
+            _post_message = (TextView) view.findViewById(R.id.post_message_view);
+            _post_image = (ImageView) view.findViewById(R.id.image_thumbnail);
+
         }
 
-        @Override
-        public String toString() {
-            return super.toString() + " '" + mContentView.getText() + "'";
-        }
     }
 }
