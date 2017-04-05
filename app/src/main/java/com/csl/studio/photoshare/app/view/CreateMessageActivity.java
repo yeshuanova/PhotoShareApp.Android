@@ -1,4 +1,4 @@
-package com.csl.studio.photoshare.app;
+package com.csl.studio.photoshare.app.view;
 
 import android.Manifest;
 import android.app.Activity;
@@ -25,6 +25,8 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.csl.studio.photoshare.app.BuildConfig;
+import com.csl.studio.photoshare.app.R;
 import com.csl.studio.photoshare.app.model.PhotoAttribute;
 import com.csl.studio.photoshare.app.model.PostFormat;
 import com.csl.studio.photoshare.app.utility.FileUtility;
