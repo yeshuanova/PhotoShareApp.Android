@@ -29,6 +29,14 @@ public class PhotoShareMainActivity extends BaseActivity implements GoogleApiCli
                 case R.id.navigation_home:
 
                     Toast.makeText(PhotoShareMainActivity.this, "Home", Toast.LENGTH_SHORT).show();
+                {
+                    FragmentManager mgr = getSupportFragmentManager();
+                    FragmentTransaction tr = mgr.beginTransaction();
+
+                    tr.replace(R.id.content, _photo_list_frag);
+                    tr.commit();
+                }
+
                     return true;
                 case R.id.navigation_user_shared_photo:
 
@@ -53,6 +61,7 @@ public class PhotoShareMainActivity extends BaseActivity implements GoogleApiCli
     private static final int CREATE_MESSAGE_CODE = 1000;
 
     private UserInfoFragment _user_info_frag;
+    private PhotoListFragment _photo_list_frag;
     private BottomNavigationView _nav_item;
     private FirebaseAuth _auth;
     private FirebaseAuth.AuthStateListener _auth_listener;
@@ -83,6 +92,7 @@ public class PhotoShareMainActivity extends BaseActivity implements GoogleApiCli
         };
 
         _user_info_frag = UserInfoFragment.newInstance();
+        _photo_list_frag = PhotoListFragment.newInstance();
 
     }
 

@@ -374,7 +374,7 @@ public class CreateMessageActivity extends BaseActivity {
         post.message = _message_edit.getText().toString();
         post.photo = photo_name;
         post.thumbnail = thumbnail_name;
-        post.post_time = getCurrentTimeString();
+        post.time = getCurrentTimeString();
 
         Map<String, Object> post_data_map = post.toMap();
 

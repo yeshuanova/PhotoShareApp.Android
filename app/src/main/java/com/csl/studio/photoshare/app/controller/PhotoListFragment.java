@@ -3,44 +3,42 @@ package com.csl.studio.photoshare.app.controller;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.csl.studio.photoshare.app.R;
-import com.csl.studio.photoshare.app.model.PostItemContent;
+import com.csl.studio.photoshare.app.model.PostFormat;
 import com.csl.studio.photoshare.app.model.PostItem;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
- * A fragment representing a list of Items.
+ * A fragment representing a list of PhotoItems.
  * <p/>
  * Activities containing this fragment MUST implement the {@link OnListFragmentInteractionListener}
  * interface.
  */
 public class PhotoListFragment extends Fragment {
 
-    // TODO: Customize parameter argument names
-    private static final String ARG_COLUMN_COUNT = "column-count";
-    // TODO: Customize parameters
-    private int mColumnCount = 1;
-    private OnListFragmentInteractionListener mListener;
+    private static final String TAG = "PhotoListFragment";
+    private DatabaseReference _firebase_db_ref;
 
-    /**
-     * Mandatory empty constructor for the fragment manager to instantiate the
-     * fragment (e.g. upon screen orientation changes).
-     */
     public PhotoListFragment() {
     }
 
-    // TODO: Customize parameter initialization
-    @SuppressWarnings("unused")
-    public static PhotoListFragment newInstance(int columnCount) {
+    public static PhotoListFragment newInstance() {
         PhotoListFragment fragment = new PhotoListFragment();
         Bundle args = new Bundle();
-        args.putInt(ARG_COLUMN_COUNT, columnCount);
         fragment.setArguments(args);
         return fragment;
     }
@@ -48,27 +46,49 @@ public class PhotoListFragment extends Fragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
-        if (getArguments() != null) {
-            mColumnCount = getArguments().getInt(ARG_COLUMN_COUNT);
-        }
+        _firebase_db_ref = FirebaseDatabase.getInstance().getReference();
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(LayoutInflater inflater, final ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_photo_item_list, container, false);
 
         // Set the adapter
         if (view instanceof RecyclerView) {
             Context context = view.getContext();
-            RecyclerView recyclerView = (RecyclerView) view;
-            if (mColumnCount <= 1) {
-                recyclerView.setLayoutManager(new LinearLayoutManager(context));
-            } else {
-                recyclerView.setLayoutManager(new GridLayoutManager(context, mColumnCount));
-            }
-            recyclerView.setAdapter(new PhotoItemRecyclerViewAdapter(PostItemContent.ITEMS, mListener));
+            final RecyclerView recyclerView = (RecyclerView) view;
+            recyclerView.setLayoutManager(new LinearLayoutManager(context));
+
+            _firebase_db_ref.child("posts").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    List<PostItem> items = new ArrayList<>();
+
+                    for (DataSnapshot post_data : dataSnapshot.getChildren()) {
+                        String key = post_data.getKey();
+                        Log.d(TAG, "Snapshot key: " + key);
+
+                        PostFormat format = post_data.getValue(PostFormat.class);
+                        PostItem item = new PostItem(format.auth_uid, format.message, format.thumbnail);
+                        items.add(item);
+
+                        recyclerView.setAdapter(new PhotoItemRecyclerViewAdapter(
+                                getActivity(),
+                                items,
+                                null
+                        ));
+
+                    }
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
         }
         return view;
     }
@@ -77,18 +97,12 @@ public class PhotoListFragment extends Fragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if (context instanceof OnListFragmentInteractionListener) {
-            mListener = (OnListFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnListFragmentInteractionListener");
-        }
+
     }
 
     @Override
     public void onDetach() {
         super.onDetach();
-        mListener = null;
     }
 
     /**
