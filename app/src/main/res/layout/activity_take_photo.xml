@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.csl.studio.photoshare.app.controller.CreateMessageActivity">
+    tools:context="com.csl.studio.photoshare.app.controller.UploadPostActivity">
 
     <android.support.v7.widget.AppCompatTextView
         android:id="@+id/post_user_view"

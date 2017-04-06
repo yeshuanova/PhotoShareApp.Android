@@ -133,7 +133,7 @@ public class PhotoShareMainActivity extends BaseActivity implements GoogleApiCli
     }
 
     private void openCreateMessageActivity() {
-        Intent it = new Intent(this, CreateMessageActivity.class);
+        Intent it = new Intent(this, UploadPostActivity.class);
         startActivityForResult(it, CREATE_MESSAGE_CODE);
     }
 

@@ -59,7 +59,7 @@ import java.util.Formatter;
 import java.util.HashMap;
 import java.util.Map;
 
-public class CreateMessageActivity extends BaseActivity {
+public class UploadPostActivity extends BaseActivity {
 
     private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 299;
     private static final int MY_PERMISSIONS_REQUEST_READ_CAMERA = 299;
@@ -78,22 +78,22 @@ public class CreateMessageActivity extends BaseActivity {
         public void onClick(View view) {
 
             if (Build.VERSION.SDK_INT >= 23) {
-                if (ContextCompat.checkSelfPermission(CreateMessageActivity.this,
+                if (ContextCompat.checkSelfPermission(UploadPostActivity.this,
                         Manifest.permission.CAMERA)
                         != PackageManager.PERMISSION_GRANTED) {
 
                     // Should we show an explanation?
-                    if (ActivityCompat.shouldShowRequestPermissionRationale(CreateMessageActivity.this,
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(UploadPostActivity.this,
                             Manifest.permission.CAMERA)) {
 
                     } else {
                         // No explanation needed, we can request the permission.
-                        ActivityCompat.requestPermissions(CreateMessageActivity.this,
+                        ActivityCompat.requestPermissions(UploadPostActivity.this,
                                 new String[]{Manifest.permission.CAMERA},
                                 MY_PERMISSIONS_REQUEST_READ_CAMERA);
                     }
                 } else {
-                    ActivityCompat.requestPermissions(CreateMessageActivity.this,
+                    ActivityCompat.requestPermissions(UploadPostActivity.this,
                             new String[]{Manifest.permission.CAMERA},
                             MY_PERMISSIONS_REQUEST_READ_CAMERA);
 
@@ -137,21 +137,21 @@ public class CreateMessageActivity extends BaseActivity {
         public void onClick(View view) {
 
             if (Build.VERSION.SDK_INT >= 23) {
-                if (ContextCompat.checkSelfPermission(CreateMessageActivity.this,
+                if (ContextCompat.checkSelfPermission(UploadPostActivity.this,
                         android.Manifest.permission.READ_EXTERNAL_STORAGE)
                         != PackageManager.PERMISSION_GRANTED) {
 
-                    if (ActivityCompat.shouldShowRequestPermissionRationale(CreateMessageActivity.this,
+                    if (ActivityCompat.shouldShowRequestPermissionRationale(UploadPostActivity.this,
                             android.Manifest.permission.READ_EXTERNAL_STORAGE)) {
 
                     } else {
-                        ActivityCompat.requestPermissions(CreateMessageActivity.this,
+                        ActivityCompat.requestPermissions(UploadPostActivity.this,
                                 new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE},
                                 MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
 
                     }
                 } else {
-                    ActivityCompat.requestPermissions(CreateMessageActivity.this,
+                    ActivityCompat.requestPermissions(UploadPostActivity.this,
                             new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE},
                             MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE);
 
@@ -182,7 +182,7 @@ public class CreateMessageActivity extends BaseActivity {
     private StorageReference _storage_ref;
     private FirebaseDatabase _database_ref;
 
-    private static final String TAG = "CreateMessageActivity";
+    private static final String TAG = "UploadPostActivity";
     private static final String PHOTO_EXT = "jpg";
     private static final String PHOTO_NAME = "photo_name" + "." + PHOTO_EXT;
     private static final String PHOTO_RESIZE_NAME = "photo_resize_name" + "." + PHOTO_EXT;
