@@ -7,7 +7,7 @@ import java.util.Map;
 
 public class PhotoAttribute {
 
-    public String file_ext = "";
+    public String ext = "";
     public String upload_time = "";
     public List<String> tags = new ArrayList<>();
 
@@ -18,7 +18,7 @@ public class PhotoAttribute {
 
     public Map<String, Object> toMap() {
         HashMap<String, Object> maps = new HashMap<>();
-        maps.put(FILE_EXT_KEY, file_ext);
+        maps.put(FILE_EXT_KEY, ext);
         maps.put(TAGS_KEY, tags);
         maps.put(UPLOAD_TIME_KEY, upload_time);
         return maps;

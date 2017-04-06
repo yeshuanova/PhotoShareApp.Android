@@ -454,7 +454,7 @@ public class UploadPostActivity extends BaseActivity {
 
         PhotoAttribute attr = new PhotoAttribute();
         attr.upload_time = Calendar.getInstance().toString();
-        attr.file_ext = file_ext;
+        attr.ext = file_ext;
         attr.upload_time = getCurrentTimeString();
 
         Map attrs_maps = attr.toMap();
