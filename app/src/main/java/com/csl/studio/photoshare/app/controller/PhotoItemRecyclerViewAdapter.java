@@ -47,12 +47,12 @@ public class PhotoItemRecyclerViewAdapter extends RecyclerView.Adapter<PostViewH
     public void onBindViewHolder(final PostViewHolder holder, int position) {
 
         PostItem item = _post_data.get(position);
-        holder._user_name.setText(item.user_uid);
-        holder._post_message.setText(item.post_content);
+        holder._user_name.setText(item.auth_uid);
+        holder._post_message.setText(item.message);
 
-        Log.d(getClass().getName(), "Thumbnail ID: " + item.thumbnail_name);
+        Log.d(getClass().getName(), "Thumbnail ID: " + item.thumbnail);
 
-        StorageReference ref = _storage_ref.child("Thumbnails").child(item.thumbnail_name);
+        StorageReference ref = _storage_ref.child("Thumbnails").child(item.thumbnail);
         Glide.with(_activity)
                 .using(new FirebaseImageLoader())
                 .load(ref)

@@ -28,7 +28,7 @@ import android.widget.Toast;
 import com.csl.studio.photoshare.app.BuildConfig;
 import com.csl.studio.photoshare.app.R;
 import com.csl.studio.photoshare.app.model.PhotoAttribute;
-import com.csl.studio.photoshare.app.model.PostFormat;
+import com.csl.studio.photoshare.app.model.PostItem;
 import com.csl.studio.photoshare.app.utility.FileUtility;
 import com.csl.studio.photoshare.app.utility.ImageUtility;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -186,8 +186,8 @@ public class UploadPostActivity extends BaseActivity {
     private static final String PHOTO_EXT = "jpg";
     private static final String PHOTO_NAME = "photo_name" + "." + PHOTO_EXT;
     private static final String PHOTO_RESIZE_NAME = "photo_resize_name" + "." + PHOTO_EXT;
-    private final int TAKE_PHOTO_CODE = 1;
-    private final int CHOOSE_GALLERY_CODE = 2;
+    private static final int TAKE_PHOTO_CODE = 1;
+    private static final int CHOOSE_GALLERY_CODE = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -276,7 +276,7 @@ public class UploadPostActivity extends BaseActivity {
         if (requestCode == MY_PERMISSIONS_REQUEST_READ_CAMERA) {
             Log.d(TAG, "Receive MY_PERMISSIONS_REQUEST_READ_CAMERA");
         } else if (requestCode == MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE) {
-            Log.d(TAG, "Receive MY_PERMISSIONS_REQUEST_READ_CAMERA");
+            Log.d(TAG, "Receive MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE");
         }
     }
 
@@ -370,8 +370,7 @@ public class UploadPostActivity extends BaseActivity {
         final String key = post_ref.push().getKey();
         Log.d(TAG, "Push's Key: " + key);
 
-        // PostFormat
-        PostFormat post = new PostFormat();
+        PostItem post = new PostItem();
         post.auth_uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         post.message = _message_edit.getText().toString();
         post.photo = photo_name;
@@ -388,6 +387,8 @@ public class UploadPostActivity extends BaseActivity {
             @Override
             public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
                 Log.d(TAG, "Update message complete");
+
+
             }
         });
     }

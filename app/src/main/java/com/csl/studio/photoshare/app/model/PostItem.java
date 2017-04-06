@@ -1,14 +1,32 @@
 package com.csl.studio.photoshare.app.model;
 
+import com.google.firebase.database.Exclude;
+
+import java.util.HashMap;
+import java.util.Map;
+
 public class PostItem {
-    public String user_uid;
-    public String post_content;
-    public String thumbnail_name;
 
-    public PostItem(String user_uid, String post_content, String thumbnail_name) {
-        this.user_uid = user_uid;
-        this.post_content = post_content;
-        this.thumbnail_name = thumbnail_name;
+    public String auth_uid = "";    // This
+    public String message = ""; // Message Content
+    public String photo = "";   // Photo name
+    public String thumbnail = "";   // Thumbnail name
+    public String time = "";
+
+    public static String AUTH_UID_KEY = "auth_uid";
+    public static String MESSAGE_KEY = "message";
+    public static String PHOTO_KEY = "photo";
+    public static String THUMBNAIL_KEY = "thumbnail";
+    public static String POST_TIME_KEY = "time";
+
+    @Exclude
+    public Map<String, Object> toMap() {
+        HashMap<String, Object> map = new HashMap<>();
+        map.put(AUTH_UID_KEY, auth_uid);
+        map.put(MESSAGE_KEY, message);
+        map.put(PHOTO_KEY, photo);
+        map.put(THUMBNAIL_KEY, thumbnail);
+        map.put(POST_TIME_KEY, time);
+        return map;
     }
-
 }

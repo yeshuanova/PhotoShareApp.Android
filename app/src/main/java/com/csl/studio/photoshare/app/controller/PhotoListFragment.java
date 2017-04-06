@@ -11,7 +11,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.csl.studio.photoshare.app.R;
-import com.csl.studio.photoshare.app.model.PostFormat;
 import com.csl.studio.photoshare.app.model.PostItem;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -70,9 +69,8 @@ public class PhotoListFragment extends Fragment {
                         String key = post_data.getKey();
                         Log.d(TAG, "Snapshot key: " + key);
 
-                        PostFormat format = post_data.getValue(PostFormat.class);
-                        PostItem item = new PostItem(format.auth_uid, format.message, format.thumbnail);
-                        items.add(item);
+                        PostItem format = post_data.getValue(PostItem.class);
+                        items.add(format);
 
                         recyclerView.setAdapter(new PhotoItemRecyclerViewAdapter(
                                 getActivity(),
