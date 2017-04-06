@@ -12,7 +12,6 @@ import com.csl.studio.photoshare.app.R;
 import com.csl.studio.photoshare.app.model.PostItem;
 import com.csl.studio.photoshare.app.model.PostViewHolder;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
@@ -25,13 +24,10 @@ import java.util.List;
  */
 public class PhotoItemRecyclerViewAdapter extends RecyclerView.Adapter<PostViewHolder> {
 
-//    private static final String TAG = "PhotoItemRecyclerViewAdapter";
-
     private Activity _activity;
     private List<PostItem> _post_data = new ArrayList<>();
     private PhotoListFragment.OnListFragmentInteractionListener _Listener;
     private StorageReference _storage_ref;
-    private FirebaseAuth _auth;
 
     public PhotoItemRecyclerViewAdapter(Activity activity, List<PostItem> items, PhotoListFragment.OnListFragmentInteractionListener listener) {
         _activity = activity;

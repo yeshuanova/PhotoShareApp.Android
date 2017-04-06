@@ -30,6 +30,8 @@
             android:lines="1"
             android:paddingEnd="8dp"
             android:paddingStart="8dp"
+            android:textColor="@android:color/black"
+            android:textStyle="bold"
             app:layout_constraintBottom_toBottomOf="@+id/author_icon"
             app:layout_constraintLeft_toRightOf="@+id/author_icon"
             app:layout_constraintRight_toRightOf="parent"
@@ -38,7 +40,8 @@
         <android.support.v7.widget.AppCompatTextView
             android:id="@+id/post_content"
             android:layout_width="0dp"
-            android:layout_height="48dp"
+            android:layout_height="wrap_content"
+            android:minHeight="24dp"
             android:padding="8dp"
             app:layout_constraintLeft_toLeftOf="@+id/author_name"
             app:layout_constraintRight_toRightOf="@+id/author_name"
@@ -47,7 +50,7 @@
         <android.support.v7.widget.AppCompatImageView
             android:id="@+id/post_thumbnail"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="72dp"
             android:src="@drawable/anonymous_person"
             app:layout_constraintLeft_toLeftOf="@+id/post_content"
             app:layout_constraintRight_toRightOf="@+id/post_content"

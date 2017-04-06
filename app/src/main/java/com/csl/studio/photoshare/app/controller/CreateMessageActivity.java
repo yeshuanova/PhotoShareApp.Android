@@ -64,7 +64,6 @@ public class CreateMessageActivity extends BaseActivity {
     private static final int MY_PERMISSIONS_REQUEST_READ_EXTERNAL_STORAGE = 299;
     private static final int MY_PERMISSIONS_REQUEST_READ_CAMERA = 299;
 
-
     private class TakePhotoListener implements View.OnClickListener {
 
         private int request_code;
@@ -345,19 +344,22 @@ public class CreateMessageActivity extends BaseActivity {
             final String photo_name = sha1_file(new File(_photo_path));
             final String thumbnail_name = sha1_file(new File(_photo_thumbnail_path));
 
+            uploadMessage(photo_name, thumbnail_name);
             uploadImage(_photo_path, photo_name);
             uploadThumbnail(_photo_thumbnail_path, thumbnail_name);
-            uploadMessage(photo_name, thumbnail_name);
-            
+
             uploadImageInfo(_photo_path, photo_name);
             uploadImageInfo(_photo_thumbnail_path, thumbnail_name);
 
             finish();
 
-        } catch (NoSuchAlgorithmException | IOException e) {
+        } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
 
-            Toast.makeText(this, "Upload Post Error", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "Upload Post Error!", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Exception Error!", Toast.LENGTH_SHORT).show();
         }
 
     }
@@ -391,7 +393,7 @@ public class CreateMessageActivity extends BaseActivity {
     }
 
     private String getCurrentTimeString() {
-        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSXXX");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
         return sdf.format(new Date());
     }
 
@@ -468,7 +470,7 @@ public class CreateMessageActivity extends BaseActivity {
 
         Uri file_thumbnail = Uri.fromFile(new File(file_path));
 
-        StorageReference thumbnails_ref = _storage_ref.child("Thumbnails/" + upload_name + ".jpg");
+        StorageReference thumbnails_ref = _storage_ref.child("Thumbnails/" + upload_name);
 
         thumbnails_ref.putFile(file_thumbnail)
                 .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
