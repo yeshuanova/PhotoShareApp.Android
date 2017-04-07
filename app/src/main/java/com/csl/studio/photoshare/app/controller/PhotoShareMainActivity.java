@@ -1,4 +1,4 @@
-package com.csl.studio.photoshare.app;
+package com.csl.studio.photoshare.app.controller;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -6,13 +6,13 @@ import android.support.annotation.NonNull;
 import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.csl.studio.photoshare.app.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.auth.FirebaseAuth;
@@ -29,11 +29,18 @@ public class PhotoShareMainActivity extends BaseActivity implements GoogleApiCli
                 case R.id.navigation_home:
 
                     Toast.makeText(PhotoShareMainActivity.this, "Home", Toast.LENGTH_SHORT).show();
-                    return true;
-                case R.id.navigation_user_shared_photo:
+                {
+                    FragmentManager mgr = getSupportFragmentManager();
+                    FragmentTransaction tr = mgr.beginTransaction();
 
-                    Toast.makeText(PhotoShareMainActivity.this, "Shared", Toast.LENGTH_SHORT).show();
+                    tr.replace(R.id.content, _photo_list_frag);
+                    tr.commit();
+                }
+
                     return true;
+//                case R.id.navigation_user_shared_photo:
+//                    Toast.makeText(PhotoShareMainActivity.this, "Shared", Toast.LENGTH_SHORT).show();
+//                    return true;
                 case R.id.navigation_user_info:
 
                     FragmentManager mgr = getSupportFragmentManager();
@@ -53,6 +60,7 @@ public class PhotoShareMainActivity extends BaseActivity implements GoogleApiCli
     private static final int CREATE_MESSAGE_CODE = 1000;
 
     private UserInfoFragment _user_info_frag;
+    private PhotoListFragment _photo_list_frag;
     private BottomNavigationView _nav_item;
     private FirebaseAuth _auth;
     private FirebaseAuth.AuthStateListener _auth_listener;
@@ -83,6 +91,7 @@ public class PhotoShareMainActivity extends BaseActivity implements GoogleApiCli
         };
 
         _user_info_frag = UserInfoFragment.newInstance();
+        _photo_list_frag = PhotoListFragment.newInstance();
 
     }
 
@@ -123,7 +132,7 @@ public class PhotoShareMainActivity extends BaseActivity implements GoogleApiCli
     }
 
     private void openCreateMessageActivity() {
-        Intent it = new Intent(this, CreateMessageActivity.class);
+        Intent it = new Intent(this, UploadPostActivity.class);
         startActivityForResult(it, CREATE_MESSAGE_CODE);
     }
 

@@ -1,4 +1,4 @@
-package com.csl.studio.photoshare.app;
+package com.csl.studio.photoshare.app.controller;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.csl.studio.photoshare.app.R;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -88,7 +89,7 @@ public class UserInfoFragment extends Fragment {
         _user_photo_view = (ImageView) root_view.findViewById(R.id.user_icon_view);
 
         _user_email_view = (TextView) root_view.findViewById(R.id.user_email_view);
-        _user_name_view = (TextView) root_view.findViewById(R.id.user_name_view);
+        _user_name_view = (TextView) root_view.findViewById(R.id.author_name);
         _user_uid_view = (TextView) root_view.findViewById(R.id.user_uid_view);
 
         final Button sign_out = (Button) root_view.findViewById(R.id.sign_out_button);

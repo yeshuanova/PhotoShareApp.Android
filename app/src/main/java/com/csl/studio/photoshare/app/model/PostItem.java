@@ -5,13 +5,13 @@ import com.google.firebase.database.Exclude;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PostFormat {
+public class PostItem {
 
     public String auth_uid = "";    // This
     public String message = ""; // Message Content
     public String photo = "";   // Photo name
     public String thumbnail = "";   // Thumbnail name
-    public String post_time = "";
+    public String time = "";
 
     public static String AUTH_UID_KEY = "auth_uid";
     public static String MESSAGE_KEY = "message";
@@ -26,7 +26,7 @@ public class PostFormat {
         map.put(MESSAGE_KEY, message);
         map.put(PHOTO_KEY, photo);
         map.put(THUMBNAIL_KEY, thumbnail);
-        map.put(POST_TIME_KEY, post_time);
+        map.put(POST_TIME_KEY, time);
         return map;
     }
 }

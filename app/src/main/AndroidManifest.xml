@@ -23,11 +23,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".LoginActivity"
+            android:name=".controller.LoginActivity"
             android:label="@string/login_activity_label"
             android:screenOrientation="portrait" />
         <activity
-            android:name=".PhotoShareMainActivity"
+            android:name=".controller.PhotoShareMainActivity"
             android:label="@string/title_activity_photo_show"
             android:screenOrientation="portrait">
             <intent-filter>
@@ -37,7 +37,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".CreateMessageActivity"
+            android:name=".controller.UploadPostActivity"
             android:screenOrientation="portrait" />
     </application>
 
