@@ -4,10 +4,10 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.csl.studio.photoshare.app.PostDetailActivity">
+    tools:context="com.csl.studio.photoshare.app.controller.PostDetailActivity">
 
     <android.support.v7.widget.AppCompatImageView
-        android:id="@+id/poster_icon"
+        android:id="@+id/post_user_icon"
         android:layout_width="48dp"
         android:layout_height="48dp"
         android:layout_marginLeft="8dp"
@@ -17,7 +17,7 @@
         app:srcCompat="@drawable/ic_account_circle_black_48dp" />
 
     <android.support.v7.widget.AppCompatTextView
-        android:id="@+id/author_name"
+        android:id="@+id/post_user_name"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginLeft="8dp"
@@ -26,13 +26,13 @@
         android:hint="author_name"
         android:textColor="@android:color/black"
         android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="@+id/poster_icon"
-        app:layout_constraintLeft_toRightOf="@+id/poster_icon"
+        app:layout_constraintBottom_toBottomOf="@+id/post_user_icon"
+        app:layout_constraintLeft_toRightOf="@+id/post_user_icon"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/poster_icon" />
+        app:layout_constraintTop_toTopOf="@+id/post_user_icon" />
 
     <android.support.v7.widget.AppCompatTextView
-        android:id="@+id/textView"
+        android:id="@+id/post_content"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
@@ -41,12 +41,12 @@
         android:minHeight="48dp"
         android:text="TextView"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toRightOf="@+id/poster_icon"
+        app:layout_constraintLeft_toRightOf="@+id/post_user_icon"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/author_name" />
+        app:layout_constraintTop_toBottomOf="@+id/post_user_name" />
 
     <android.support.v7.widget.AppCompatImageView
-        android:id="@+id/imageView"
+        android:id="@+id/post_image"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginLeft="8dp"
@@ -54,9 +54,21 @@
         android:layout_marginTop="8dp"
         android:minHeight="120dp"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintLeft_toRightOf="@+id/poster_icon"
+        app:layout_constraintLeft_toRightOf="@+id/post_user_icon"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:layout_constraintTop_toBottomOf="@+id/post_content"
         app:srcCompat="@android:color/darker_gray" />
+
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/post_upload_time"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:hint="Upload Time"
+        app:layout_constraintLeft_toRightOf="@+id/post_user_icon"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/post_image" />
 
 </android.support.constraint.ConstraintLayout>

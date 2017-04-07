@@ -16,7 +16,7 @@ public class PostViewHolder extends RecyclerView.ViewHolder {
     public PostViewHolder(View view) {
         super(view);
         _author_icon = (ImageView) view.findViewById(R.id.author_icon);
-        _user_name = (TextView) view.findViewById(R.id.author_name);
+        _user_name = (TextView) view.findViewById(R.id.post_user_name);
         _post_message = (TextView) view.findViewById(R.id.post_content);
         _post_image = (ImageView) view.findViewById(R.id.post_thumbnail);
 
