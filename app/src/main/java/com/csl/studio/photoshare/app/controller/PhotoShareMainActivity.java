@@ -38,10 +38,9 @@ public class PhotoShareMainActivity extends BaseActivity implements GoogleApiCli
                 }
 
                     return true;
-                case R.id.navigation_user_shared_photo:
-
-                    Toast.makeText(PhotoShareMainActivity.this, "Shared", Toast.LENGTH_SHORT).show();
-                    return true;
+//                case R.id.navigation_user_shared_photo:
+//                    Toast.makeText(PhotoShareMainActivity.this, "Shared", Toast.LENGTH_SHORT).show();
+//                    return true;
                 case R.id.navigation_user_info:
 
                     FragmentManager mgr = getSupportFragmentManager();

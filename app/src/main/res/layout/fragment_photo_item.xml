@@ -50,7 +50,7 @@
         <android.support.v7.widget.AppCompatImageView
             android:id="@+id/post_thumbnail"
             android:layout_width="0dp"
-            android:layout_height="72dp"
+            android:layout_height="80dp"
             android:src="@drawable/anonymous_person"
             app:layout_constraintLeft_toLeftOf="@+id/post_content"
             app:layout_constraintRight_toRightOf="@+id/post_content"

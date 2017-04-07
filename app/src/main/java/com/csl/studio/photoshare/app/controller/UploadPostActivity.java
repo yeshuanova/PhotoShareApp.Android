@@ -12,6 +12,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.util.Log;
@@ -32,8 +33,6 @@ import com.csl.studio.photoshare.app.model.PostItem;
 import com.csl.studio.photoshare.app.utility.FileUtility;
 import com.csl.studio.photoshare.app.utility.ImageUtility;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -53,7 +52,6 @@ import java.io.InputStream;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Formatter;
 import java.util.HashMap;
@@ -188,6 +186,10 @@ public class UploadPostActivity extends BaseActivity {
     private static final String PHOTO_RESIZE_NAME = "photo_resize_name" + "." + PHOTO_EXT;
     private static final int TAKE_PHOTO_CODE = 1;
     private static final int CHOOSE_GALLERY_CODE = 2;
+
+    private int _upload_count = 0;
+    private int _upload_success_count = 0;
+    private static final int UPLOAD_MAX_TASK = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -341,17 +343,51 @@ public class UploadPostActivity extends BaseActivity {
         }
 
         try {
+
+            initUploadCount();
+            showProgressDialog();
+
+            DatabaseReference post_ref = _database_ref.getReference();
+            final String key = post_ref.child("posts").push().getKey();
             final String photo_name = sha1_file(new File(_photo_path));
             final String thumbnail_name = sha1_file(new File(_photo_thumbnail_path));
+            final String auth_uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-            uploadMessage(photo_name, thumbnail_name);
-            uploadImage(_photo_path, photo_name);
-            uploadThumbnail(_photo_thumbnail_path, thumbnail_name);
+            Map<String, Object> post_map = createPostMap(photo_name, thumbnail_name);
 
-            uploadImageInfo(_photo_path, photo_name);
-            uploadImageInfo(_photo_thumbnail_path, thumbnail_name);
+            final Map<String, Object> update_list = new HashMap<>();
+            update_list.put("/posts/" + key, post_map);
+            update_list.put("/user-posts/" + auth_uid + "/" + key, post_map);
+            update_list.put("/image-info/" + photo_name, createImageInfo(_photo_path));
+            update_list.put("/image-info/" + thumbnail_name, createImageInfo(_photo_thumbnail_path));
 
-            finish();
+            post_ref.updateChildren(update_list, new DatabaseReference.CompletionListener() {
+                @Override
+                public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
+                    Log.d(TAG, "Update Post complete");
+                    uploadComplete(null == databaseError);
+                }
+            });
+
+            StorageReference image_ref = _storage_ref.child("Photos").child(photo_name);
+            Uri file_photo = Uri.fromFile(new File(_photo_path));
+            image_ref.putFile(file_photo).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                    Log.d(TAG, "Update Image Complete");
+                    uploadComplete(task.isSuccessful());
+                }
+            });
+
+            StorageReference thumbnail_ref = _storage_ref.child("Thumbnails").child(thumbnail_name);
+            Uri file_thumbnail = Uri.fromFile(new File(_photo_thumbnail_path));
+            thumbnail_ref.putFile(file_thumbnail).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                    Log.d(TAG, "Update Thumbnail Complete");
+                    uploadComplete(task.isSuccessful());
+                }
+            });
 
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
@@ -364,12 +400,7 @@ public class UploadPostActivity extends BaseActivity {
 
     }
 
-    private void uploadMessage(String photo_name, String thumbnail_name) {
-
-        DatabaseReference post_ref = _database_ref.getReference();
-        final String key = post_ref.push().getKey();
-        Log.d(TAG, "Push's Key: " + key);
-
+    private Map<String, Object> createPostMap(String photo_name, String thumbnail_name) {
         PostItem post = new PostItem();
         post.auth_uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
         post.message = _message_edit.getText().toString();
@@ -377,20 +408,41 @@ public class UploadPostActivity extends BaseActivity {
         post.thumbnail = thumbnail_name;
         post.time = getCurrentTimeString();
 
-        Map<String, Object> post_data_map = post.toMap();
+        return post.toMap();
+    }
 
-        Map<String, Object> update_list = new HashMap<>();
-        update_list.put("/posts/" + key, post_data_map);
-        update_list.put("/user-posts/" + post.auth_uid + "/" + key, post_data_map);
+    private Map<String, Object> createImageInfo(String file_path) {
+        PhotoAttribute attr = new PhotoAttribute();
+        attr.ext = file_path.substring(file_path.lastIndexOf(".") + 1);
+        attr.upload_time = getCurrentTimeString();
 
-        post_ref.updateChildren(update_list, new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                Log.d(TAG, "Update message complete");
+        return attr.toMap();
+    }
 
+    private void initUploadCount() {
+        _upload_count = 0;
+        _upload_success_count = 0;
+    }
 
+    private void checkUploadCount() {
+
+        if (_upload_count >= UPLOAD_MAX_TASK) {
+            if (_upload_count > _upload_success_count) {
+                Toast.makeText(this, "Upload Error!", Toast.LENGTH_SHORT).show();
+                initUploadCount();
+            } else {
+                hideProgressDialog();
+                finish();
             }
-        });
+        }
+    }
+
+    private void uploadComplete(Boolean is_success) {
+        _upload_count++;
+        if (is_success) {
+            _upload_success_count++;
+        }
+        checkUploadCount();
     }
 
     private String getCurrentTimeString() {
@@ -403,7 +455,7 @@ public class UploadPostActivity extends BaseActivity {
 
         try (InputStream is = new BufferedInputStream(new FileInputStream(file))) {
             final byte[] buffer = new byte[1024];
-            for (int read = 0; (read = is.read(buffer)) != -1; ) {
+            for (int read; (read = is.read(buffer)) != -1; ) {
                 messageDigest.update(buffer, 0, read);
             }
         }
@@ -415,85 +467,6 @@ public class UploadPostActivity extends BaseActivity {
             }
             return formatter.toString();
         }
-    }
-
-
-    private void uploadImage(String file_path, String upload_name) {
-
-        StorageReference photos_ref = _storage_ref.child("Photos/" + upload_name);
-
-        Uri file_photo = Uri.fromFile(new File(file_path));
-        photos_ref.putFile(file_photo)
-                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        // Get a URL to the uploaded content
-                        Log.d(TAG, "Upload Photo Successful");
-                        Log.d(TAG, "URL: " + taskSnapshot.getDownloadUrl());
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        Log.d(TAG, "Upload Photo Error: " + exception.toString());
-                    }
-                })
-                .addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                        Log.d(TAG, "Upload photo complete");
-                    }
-                });
-
-
-    }
-
-    private void uploadImageInfo(String file_path, String photo_name) {
-
-        String file_ext = file_path.substring(file_path.lastIndexOf(".") + 1);
-
-        PhotoAttribute attr = new PhotoAttribute();
-        attr.upload_time = Calendar.getInstance().toString();
-        attr.ext = file_ext;
-        attr.upload_time = getCurrentTimeString();
-
-        Map attrs_maps = attr.toMap();
-        DatabaseReference image_ref = _database_ref.getReference().child("image-info").child(photo_name);
-        image_ref.setValue(attrs_maps, new DatabaseReference.CompletionListener() {
-            @Override
-            public void onComplete(DatabaseError databaseError, DatabaseReference databaseReference) {
-                Log.d(TAG, "Update Image Attribute Ok");
-            }
-        });
-    }
-
-    private void uploadThumbnail(String file_path, String upload_name) {
-
-        Uri file_thumbnail = Uri.fromFile(new File(file_path));
-
-        StorageReference thumbnails_ref = _storage_ref.child("Thumbnails/" + upload_name);
-
-        thumbnails_ref.putFile(file_thumbnail)
-                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        Log.d(TAG, "Upload Thumbnail success");
-                        Log.d(TAG, "URL: " + taskSnapshot.getDownloadUrl());
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Log.d(TAG, "Upload Thumbnail failure");
-                    }
-                })
-                .addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                        Log.d(TAG, "Upload Thumbnail complete");
-                    }
-                });
-
     }
 
 }
