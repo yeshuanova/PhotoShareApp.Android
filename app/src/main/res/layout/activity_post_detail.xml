@@ -6,28 +6,57 @@
     android:layout_height="match_parent"
     tools:context="com.csl.studio.photoshare.app.PostDetailActivity">
 
-    <ImageView
+    <android.support.v7.widget.AppCompatImageView
         android:id="@+id/poster_icon"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
         android:layout_marginLeft="8dp"
         android:layout_marginTop="8dp"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_account_circle_black_48dp" />
 
-    <TextView
-        android:id="@+id/textView"
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/author_name"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
         android:gravity="center_vertical"
-        android:text="TextView"
+        android:hint="author_name"
+        android:textColor="@android:color/black"
+        android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="@+id/poster_icon"
         app:layout_constraintLeft_toRightOf="@+id/poster_icon"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="@+id/poster_icon" />
 
+    <android.support.v7.widget.AppCompatTextView
+        android:id="@+id/textView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:minHeight="48dp"
+        android:text="TextView"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toRightOf="@+id/poster_icon"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/author_name" />
+
+    <android.support.v7.widget.AppCompatImageView
+        android:id="@+id/imageView"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:minHeight="120dp"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintLeft_toRightOf="@+id/poster_icon"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textView"
+        app:srcCompat="@android:color/darker_gray" />
 
 </android.support.constraint.ConstraintLayout>
