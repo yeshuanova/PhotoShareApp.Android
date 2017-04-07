@@ -36,9 +36,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name=".controller.UploadPostActivity"
             android:screenOrientation="portrait" />
+
+        <activity
+            android:name=".PostDetailActivity"
+            android:screenOrientation="portrait" />
+
     </application>
 
 </manifest>
