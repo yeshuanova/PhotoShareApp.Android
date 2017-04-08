@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import com.bumptech.glide.Glide;
 import com.csl.studio.photoshare.app.R;
 import com.csl.studio.photoshare.app.model.PostItem;
-import com.csl.studio.photoshare.app.model.PostViewHolder;
+import com.csl.studio.photoshare.app.controller.viewholder.PostViewHolder;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;

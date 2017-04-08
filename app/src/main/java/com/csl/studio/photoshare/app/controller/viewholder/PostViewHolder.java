@@ -1,4 +1,4 @@
-package com.csl.studio.photoshare.app.model;
+package com.csl.studio.photoshare.app.controller.viewholder;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
