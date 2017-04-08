@@ -16,6 +16,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.csl.studio.photoshare.app.R;
+import com.csl.studio.photoshare.app.model.UserAttribute;
+import com.csl.studio.photoshare.app.utility.firebase.database.DatabaseUtility;
 import com.google.android.gms.auth.api.Auth;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
@@ -29,6 +31,8 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class LoginActivity extends BaseActivity implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -107,7 +111,6 @@ public class LoginActivity extends BaseActivity implements GoogleApiClient.OnCon
                     finish();
                 } else {
                     Log.d(TAG, "onAuthStateChanged:signed_out");
-
                 }
             }
         };

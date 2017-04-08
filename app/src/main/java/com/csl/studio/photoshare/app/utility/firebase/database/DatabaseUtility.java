@@ -7,6 +7,7 @@ public class DatabaseUtility {
         public static final String POSTS = "posts";
         public static final String USER_POSTS = "user-posts";
         public static final String IMAGE_INFO = "image-info";
+        public static final String USER_INFO = "user-info";
     }
 
 }

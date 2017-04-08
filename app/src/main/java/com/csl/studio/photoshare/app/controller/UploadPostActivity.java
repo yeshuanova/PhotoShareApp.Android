@@ -32,6 +32,8 @@ import com.csl.studio.photoshare.app.model.PhotoAttribute;
 import com.csl.studio.photoshare.app.model.PostItem;
 import com.csl.studio.photoshare.app.utility.FileUtility;
 import com.csl.studio.photoshare.app.utility.ImageUtility;
+import com.csl.studio.photoshare.app.utility.firebase.database.DatabaseUtility;
+import com.csl.studio.photoshare.app.utility.firebase.storage.StorageUtility;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -355,11 +357,16 @@ public class UploadPostActivity extends BaseActivity {
 
             Map<String, Object> post_map = createPostMap(photo_name, thumbnail_name);
 
+            final String post_path = "/" + DatabaseUtility.PATH.POSTS + "/" + key;
+            final String user_posts_path = "/" + DatabaseUtility.PATH.USER_POSTS
+                    + "/" + auth_uid + "/" + key;
+            final String image_info_path = "/" + DatabaseUtility.PATH.IMAGE_INFO + "/";
+
             final Map<String, Object> update_list = new HashMap<>();
-            update_list.put("/posts/" + key, post_map);
-            update_list.put("/user-posts/" + auth_uid + "/" + key, post_map);
-            update_list.put("/image-info/" + photo_name, createImageInfo(_photo_path));
-            update_list.put("/image-info/" + thumbnail_name, createImageInfo(_photo_thumbnail_path));
+            update_list.put(post_path, post_map);
+            update_list.put(user_posts_path, post_map);
+            update_list.put(image_info_path + photo_name, createImageInfo(_photo_path));
+            update_list.put(image_info_path + thumbnail_name, createImageInfo(_photo_thumbnail_path));
 
             post_ref.updateChildren(update_list, new DatabaseReference.CompletionListener() {
                 @Override
@@ -369,25 +376,31 @@ public class UploadPostActivity extends BaseActivity {
                 }
             });
 
-            StorageReference image_ref = _storage_ref.child("Photos").child(photo_name);
-            Uri file_photo = Uri.fromFile(new File(_photo_path));
-            image_ref.putFile(file_photo).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                    Log.d(TAG, "Update Image Complete");
-                    uploadComplete(task.isSuccessful());
-                }
-            });
+            // Upload original image to Firebase Storage
+            StorageReference image_ref = _storage_ref
+                    .child(StorageUtility.PATH.PHOTOS).child(photo_name);
 
-            StorageReference thumbnail_ref = _storage_ref.child("Thumbnails").child(thumbnail_name);
-            Uri file_thumbnail = Uri.fromFile(new File(_photo_thumbnail_path));
-            thumbnail_ref.putFile(file_thumbnail).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                    Log.d(TAG, "Update Thumbnail Complete");
-                    uploadComplete(task.isSuccessful());
-                }
-            });
+            image_ref.putFile(Uri.fromFile(new File(_photo_path)))
+                    .addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                            Log.d(TAG, "Update Image Complete");
+                            uploadComplete(task.isSuccessful());
+                        }
+                    });
+
+            // Upload thumbnail of image to Firebase Storage
+            StorageReference thumbnail_ref = _storage_ref
+                    .child(StorageUtility.PATH.THUMBNAILS).child(thumbnail_name);
+
+            thumbnail_ref.putFile(Uri.fromFile(new File(_photo_thumbnail_path)))
+                    .addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
+                        @Override
+                        public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
+                            Log.d(TAG, "Update Thumbnail Complete");
+                            uploadComplete(task.isSuccessful());
+                        }
+                    });
 
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
