@@ -13,10 +13,14 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.csl.studio.photoshare.app.R;
+import com.csl.studio.photoshare.app.model.UserAttribute;
+import com.csl.studio.photoshare.app.utility.firebase.database.DatabaseUtility;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class PhotoShareMainActivity extends BaseActivity implements GoogleApiClient.OnConnectionFailedListener {
 
@@ -81,6 +85,7 @@ public class PhotoShareMainActivity extends BaseActivity implements GoogleApiCli
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
                     Log.d(TAG, "onAuthStateChanged:signed_in");
+                    writeUserInfo(user);
                     updateUI();
                 } else {
                     Log.d(TAG, "onAuthStateChanged:signed_out");
@@ -124,6 +129,15 @@ public class PhotoShareMainActivity extends BaseActivity implements GoogleApiCli
             openCreateMessageActivity();
         }
         return false;
+    }
+
+    private void writeUserInfo(FirebaseUser user) {
+        UserAttribute user_attr = new UserAttribute();
+        user_attr.name = user.getDisplayName();
+        user_attr.email = user.getEmail();
+
+        DatabaseReference user_info_ref = FirebaseDatabase.getInstance().getReference();
+        user_info_ref.child(DatabaseUtility.PATH.USER_INFO).child(user.getUid()).setValue(user_attr);
     }
 
     private void updateUI() {
