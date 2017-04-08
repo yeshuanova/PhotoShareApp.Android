@@ -8,7 +8,6 @@ import java.util.Map;
 public class PostItem {
     public String post_uid = "";    // Assign by app, not database structure.
     public String auth_uid = "";
-    public String auth_email = "";
     public String message = ""; // Message Content
     public String photo = "";   // Photo name
     public String thumbnail = "";   // Thumbnail name

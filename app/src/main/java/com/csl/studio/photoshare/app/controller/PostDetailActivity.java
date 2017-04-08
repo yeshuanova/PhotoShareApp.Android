@@ -8,6 +8,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.csl.studio.photoshare.app.R;
 import com.csl.studio.photoshare.app.model.PostItem;
+import com.csl.studio.photoshare.app.model.UserAttribute;
 import com.csl.studio.photoshare.app.utility.firebase.database.DatabaseUtility;
 import com.csl.studio.photoshare.app.utility.firebase.storage.StorageUtility;
 import com.firebase.ui.storage.images.FirebaseImageLoader;
@@ -36,6 +37,7 @@ public class PostDetailActivity extends BaseActivity {
     private TextView _post_time;
 
     private ValueEventListener _fetch_post_listener;
+    private ValueEventListener _fetch_user_listener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,7 +64,7 @@ public class PostDetailActivity extends BaseActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
 
-                    PostItem item = dataSnapshot.getValue(PostItem.class);
+                    final PostItem item = dataSnapshot.getValue(PostItem.class);
                     _post_user_name.setText(item.auth_uid);
                     _post_content.setText(item.message);
                     _post_time.setText(item.time);
@@ -74,9 +76,47 @@ public class PostDetailActivity extends BaseActivity {
                             .using(new FirebaseImageLoader())
                             .load(photo_ref)
                             .into(_post_image);
+
+                    DatabaseReference user_ref = _database_ref.child(DatabaseUtility.PATH.USER_INFO)
+                            .child(item.auth_uid);
+
+                    user_ref.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()) {
+                                UserAttribute user_attr = dataSnapshot.getValue(UserAttribute.class);
+                                if (user_attr.name.isEmpty()) {
+                                    _post_user_name.setText(user_attr.email);
+                                } else {
+                                    _post_user_name.setText(user_attr.name);
+                                }
+                            } else {
+                                _post_user_name.setText(item.auth_uid);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+                            _post_user_name.setText(item.auth_uid);
+                        }
+                    });
+
+
                 } else {
                     initialError();
                 }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+
+        _fetch_user_listener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
             }
 
             @Override
@@ -90,22 +130,16 @@ public class PostDetailActivity extends BaseActivity {
     @Override
     protected void onStart() {
         super.onStart();
-
-        _post_ref = _database_ref
-                .child(DatabaseUtility.PATH.POSTS)
-                .child(_post_uid);
-
+        _post_ref = _database_ref.child(DatabaseUtility.PATH.POSTS).child(_post_uid);
         _post_ref.addListenerForSingleValueEvent(_fetch_post_listener);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-
         if (null != _fetch_post_listener) {
             _post_ref.removeEventListener(_fetch_post_listener);
         }
-
     }
 
     private void initialError() {
