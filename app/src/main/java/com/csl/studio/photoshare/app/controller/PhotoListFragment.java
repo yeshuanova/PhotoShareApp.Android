@@ -70,6 +70,7 @@ public class PhotoListFragment extends Fragment {
                         Log.d(TAG, "Snapshot key: " + key);
 
                         PostItem format = post_data.getValue(PostItem.class);
+                        format.post_uid = key;
                         items.add(format);
 
                         recyclerView.setAdapter(new PhotoItemRecyclerViewAdapter(

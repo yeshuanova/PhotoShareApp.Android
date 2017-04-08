@@ -26,6 +26,7 @@ public class PostDetailActivity extends BaseActivity {
 
     private String _post_uid = "";
     private DatabaseReference _database_ref;
+    private DatabaseReference _post_ref;
     private StorageReference _storage_ref;
 
     private ImageView _post_user_icon;
@@ -33,6 +34,8 @@ public class PostDetailActivity extends BaseActivity {
     private TextView _post_content;
     private ImageView _post_image;
     private TextView _post_time;
+
+    private ValueEventListener _fetch_post_listener;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,18 +57,7 @@ public class PostDetailActivity extends BaseActivity {
         _database_ref = FirebaseDatabase.getInstance().getReference();
         _storage_ref = FirebaseStorage.getInstance().getReference();
 
-        startUpdateDetailPostUI();
-    }
-
-    private void startUpdateDetailPostUI() {
-
-        showProgressDialog();
-
-        DatabaseReference post_ref = _database_ref
-                .child(DatabaseUtility.PATH.POSTS)
-                .child(_post_uid);
-
-        post_ref.addListenerForSingleValueEvent(new ValueEventListener() {
+        _fetch_post_listener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (dataSnapshot.exists()) {
@@ -74,7 +66,6 @@ public class PostDetailActivity extends BaseActivity {
                     _post_user_name.setText(item.auth_uid);
                     _post_content.setText(item.message);
                     _post_time.setText(item.time);
-
 
                     StorageReference photo_ref = _storage_ref.child(StorageUtility.PATH.PHOTOS)
                             .child(item.photo);
@@ -90,18 +81,37 @@ public class PostDetailActivity extends BaseActivity {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                initialError();
+
             }
-        });
+        };
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        _post_ref = _database_ref
+                .child(DatabaseUtility.PATH.POSTS)
+                .child(_post_uid);
+
+        _post_ref.addListenerForSingleValueEvent(_fetch_post_listener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+        if (null != _fetch_post_listener) {
+            _post_ref.removeEventListener(_fetch_post_listener);
+        }
 
     }
 
     private void initialError() {
-
         hideProgressDialog();
         Toast.makeText(this, "No Post Data", Toast.LENGTH_SHORT).show();
         finish();
     }
-
 
 }
