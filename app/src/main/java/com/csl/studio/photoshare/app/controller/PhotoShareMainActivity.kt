@@ -15,6 +15,7 @@ import com.google.android.gms.common.api.GoogleApiClient
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.FirebaseDatabase
+import kotlinx.android.synthetic.main.activity_photo_show.*
 
 class PhotoShareMainActivity : BaseActivity(), GoogleApiClient.OnConnectionFailedListener {
 
@@ -49,7 +50,6 @@ class PhotoShareMainActivity : BaseActivity(), GoogleApiClient.OnConnectionFaile
 
     private var _user_info_frag: UserInfoFragment? = null
     private var _photo_list_frag: PhotoListFragment? = null
-    private var _nav_item: BottomNavigationView? = null
     private var _auth: FirebaseAuth? = null
     private var _auth_listener: FirebaseAuth.AuthStateListener? = null
 
@@ -57,8 +57,7 @@ class PhotoShareMainActivity : BaseActivity(), GoogleApiClient.OnConnectionFaile
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_photo_show)
 
-        _nav_item = findViewById(R.id.navigation) as BottomNavigationView
-        _nav_item!!.setOnNavigationItemSelectedListener(_select_nav_item_listener)
+        navigation.setOnNavigationItemSelectedListener(_select_nav_item_listener)
 
         // Initial Firebase Authentication
         _auth = FirebaseAuth.getInstance()
@@ -117,8 +116,8 @@ class PhotoShareMainActivity : BaseActivity(), GoogleApiClient.OnConnectionFaile
     }
 
     private fun updateUI() {
-        _nav_item!!.setOnNavigationItemSelectedListener(_select_nav_item_listener)
-        _nav_item!!.selectedItemId = R.id.navigation_home
+        navigation.setOnNavigationItemSelectedListener(_select_nav_item_listener)
+        navigation.selectedItemId = R.id.navigation_home
     }
 
     private fun openCreateMessageActivity() {

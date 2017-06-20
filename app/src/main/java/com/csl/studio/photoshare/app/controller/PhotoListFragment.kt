@@ -36,7 +36,7 @@ class PhotoListFragment : Fragment() {
 
             recyclerView.layoutManager = LinearLayoutManager(context)
 
-            _firebase_db_ref!!.child("posts").addValueEventListener(object : ValueEventListener {
+            _firebase_db_ref.child("posts").addValueEventListener(object : ValueEventListener {
 
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
 
@@ -47,11 +47,13 @@ class PhotoListFragment : Fragment() {
                         Log.d(TAG, "Snapshot key: " + key)
 
                         val format = post_data.getValue<PostItem>(PostItem::class.java)
-                        format!!.post_uid = key
-                        items.add(format)
 
-                        recyclerView.adapter = PhotoItemRecyclerViewAdapter(activity, items)
+                        format?.let {
+                            format.post_uid = key
+                            items.add(format)
+                        }
                     }
+                    recyclerView.adapter = PhotoItemRecyclerViewAdapter(activity, items)
                 }
 
                 override fun onCancelled(databaseError: DatabaseError) {

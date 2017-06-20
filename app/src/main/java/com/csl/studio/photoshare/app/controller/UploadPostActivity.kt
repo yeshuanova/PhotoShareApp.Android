@@ -10,6 +10,7 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.MediaStore
+import android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.util.Log
@@ -37,13 +38,7 @@ import java.util.*
 
 class UploadPostActivity : BaseActivity() {
 
-    private inner class TakePhotoListener internal constructor(private val request_code: Int, img_name: String) : View.OnClickListener {
-
-        private var img_name = ""
-
-        init {
-            this.img_name = img_name
-        }
+    private inner class TakePhotoListener internal constructor(private val request_code: Int, private val img_name: String) : View.OnClickListener {
 
         override fun onClick(view: View) {
 
@@ -178,7 +173,7 @@ class UploadPostActivity : BaseActivity() {
         return false
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         if (TAKE_PHOTO_CODE == requestCode && Activity.RESULT_OK == resultCode) {
@@ -191,7 +186,8 @@ class UploadPostActivity : BaseActivity() {
                 convertToThumbnail(origin_bmp, 200)
             }
         } else if (CHOOSE_GALLERY_CODE == requestCode && Activity.RESULT_OK == resultCode) {
-            val image_uri = data.data
+
+            val image_uri = data?.data
 
             Log.d(TAG, "Image URI: " + image_uri)
 
@@ -210,7 +206,6 @@ class UploadPostActivity : BaseActivity() {
                 cursor.close()
             }
         }
-
     }
 
     override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
@@ -254,9 +249,7 @@ class UploadPostActivity : BaseActivity() {
             e.printStackTrace()
         } finally {
             try {
-                if (out != null) {
-                    out.close()
-                }
+                out?.let { out!!.close() }
             } catch (e: IOException) {
                 e.printStackTrace()
             }

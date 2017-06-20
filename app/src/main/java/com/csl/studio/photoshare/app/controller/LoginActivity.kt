@@ -5,7 +5,7 @@ import android.os.Bundle
 import android.text.TextUtils
 import android.util.Log
 import android.view.inputmethod.EditorInfo
-import android.widget.*
+import android.widget.Toast
 import com.csl.studio.photoshare.app.R
 import com.google.android.gms.auth.api.Auth
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount
@@ -58,18 +58,6 @@ class LoginActivity : BaseActivity(), GoogleApiClient.OnConnectionFailedListener
                 .enableAutoManage(this, this)
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build()
-
-        // Initial Firebase Authentication
-//        _auth = FirebaseAuth.getInstance()
-//        _auth_listener = FirebaseAuth.AuthStateListener { firebaseAuth ->
-//            val user = firebaseAuth.currentUser
-//            if (user != null) {
-//                Log.d(TAG, "onAuthStateChanged:signed_in:" + user.uid)
-//                finish()
-//            } else {
-//                Log.d(TAG, "onAuthStateChanged:signed_out")
-//            }
-//        }
 
     }
 
@@ -149,7 +137,7 @@ class LoginActivity : BaseActivity(), GoogleApiClient.OnConnectionFailedListener
         startActivityForResult(signInIntent, GOOGLE_SIGN_IN)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == GOOGLE_SIGN_IN) {
             val result = Auth.GoogleSignInApi.getSignInResultFromIntent(data)
