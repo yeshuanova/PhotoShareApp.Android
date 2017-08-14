@@ -1,6 +1,5 @@
 package com.csl.studio.photoshare.app.controller
 
-import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v7.widget.LinearLayoutManager
@@ -11,7 +10,10 @@ import android.view.View
 import android.view.ViewGroup
 import com.csl.studio.photoshare.app.R
 import com.csl.studio.photoshare.app.model.PostItem
-import com.google.firebase.database.*
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 import java.util.*
 
 /**
@@ -31,10 +33,8 @@ class PhotoListFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         if (view is RecyclerView) {
-            val context = view.getContext()
-            val recyclerView = view
 
-            recyclerView.layoutManager = LinearLayoutManager(context)
+            view.layoutManager = LinearLayoutManager(view.context)
 
             _firebase_db_ref.child("posts").addValueEventListener(object : ValueEventListener {
 
@@ -53,7 +53,7 @@ class PhotoListFragment : Fragment() {
                             items.add(format)
                         }
                     }
-                    recyclerView.adapter = PhotoItemRecyclerViewAdapter(activity, items)
+                    view.adapter = PhotoItemRecyclerViewAdapter(activity, items)
                 }
 
                 override fun onCancelled(databaseError: DatabaseError) {
@@ -63,15 +63,6 @@ class PhotoListFragment : Fragment() {
 
         }
 
-    }
-
-    override fun onAttach(context: Context?) {
-        super.onAttach(context)
-
-    }
-
-    override fun onDetach() {
-        super.onDetach()
     }
 
     companion object {

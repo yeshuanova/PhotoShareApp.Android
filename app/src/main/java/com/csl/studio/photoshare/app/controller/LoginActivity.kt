@@ -175,24 +175,20 @@ class LoginActivity : BaseActivity(), GoogleApiClient.OnConnectionFailedListener
         email.error = null
         password.error = null
 
-        // Store values at the time of the login attempt.
-        val email_str = email.text.toString()
-        val password_str = password.text.toString()
-
         var result = true
 
         // Check for a valid password, if the user entered one.
-        if (!TextUtils.isEmpty(password_str) && !isPasswordValid(password_str)) {
+        if (!TextUtils.isEmpty(password.text.toString()) && !isPasswordValid(password.text.toString())) {
             password.error = getString(R.string.error_invalid_password)
             result = false
         }
 
         // Check for a valid email address.
-        if (TextUtils.isEmpty(email_str)) {
+        if (TextUtils.isEmpty(email.text.toString())) {
 
             email.error = getString(R.string.error_field_required)
             result = false
-        } else if (!isEmailValid(email_str)) {
+        } else if (!isEmailValid(email.text.toString())) {
             email.error = getString(R.string.error_invalid_email)
             result = false
         }

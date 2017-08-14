@@ -6,7 +6,7 @@ import android.support.v7.app.AppCompatActivity
 
 import com.csl.studio.photoshare.app.R
 
-open class BaseActivity : AppCompatActivity() {
+abstract class BaseActivity : AppCompatActivity() {
 
     @VisibleForTesting
     var mProgressDialog: ProgressDialog? = null
